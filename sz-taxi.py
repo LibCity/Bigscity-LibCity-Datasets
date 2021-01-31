@@ -7,9 +7,12 @@ import sys
 import h5py
 import pickle
 
+def ensure_dir(dir_path):
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
 outputdir = 'output/SZ-TAXI'
-if outputdir not in os.listdir('.'):
-    os.mkdir(outputdir)
+ensure_dir(outputdir)
 
 dataurl = 'input/SZ-TAXI/'
 dataname = outputdir+'/SZ-TAXI'
