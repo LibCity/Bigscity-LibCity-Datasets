@@ -35,9 +35,9 @@ rel_id_counter = 0
 for i in range(adj.shape[0]):
     for j in range(adj.shape[1]):
         ###        'rel_id',       'type', 'origin_id',   'destination_id', 'link_weight'
-        rel.append([rel_id_counter, 'geo', geo_id_list[i], geo_id_list[j], adj[i,j]])
+        rel.append([rel_id_counter, 'geo', geo_id_list[i], geo_id_list[j], None, adj[i,j]])
         rel_id_counter += 1
-rel = pd.DataFrame(rel, columns=['rel_id', 'type', 'origin_id', 'destination_id', 'link_weight'])
+rel = pd.DataFrame(rel, columns=['rel_id', 'type', 'origin_id', 'destination_id', 'cost','link_weight'])
 rel.to_csv(dataname + '.rel', index=False)
 #-----------------------------------------------------------------------------------------
 
@@ -55,7 +55,7 @@ def num2time(num):
 
     day = str(day) if day > 9 else '0'+ str(day)
     hour = str(hour) if hour > 9 else '0' + str(hour)
-    minute = str(15*quarter)
+    minute = str(15*quarter) if 15*quarter > 9 else '0' + str(15*quarter)
 
     time = '2015-01-' + day + 'T' + hour + ':' + minute + ':' + '00Z'
     return time
