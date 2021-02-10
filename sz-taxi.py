@@ -35,9 +35,9 @@ rel_id_counter = 0
 for i in range(adj.shape[0]):
     for j in range(adj.shape[1]):
         ###        'rel_id',       'type', 'origin_id',   'destination_id', 'link_weight'
-        rel.append([rel_id_counter, 'geo', geo_id_list[i], geo_id_list[j], None, adj[i,j]])
+        rel.append([rel_id_counter, 'geo', geo_id_list[i], geo_id_list[j], adj[i,j]])
         rel_id_counter += 1
-rel = pd.DataFrame(rel, columns=['rel_id', 'type', 'origin_id', 'destination_id', 'cost','link_weight'])
+rel = pd.DataFrame(rel, columns=['rel_id', 'type', 'origin_id', 'destination_id', 'link_weight'])
 rel.to_csv(dataname + '.rel', index=False)
 #-----------------------------------------------------------------------------------------
 
