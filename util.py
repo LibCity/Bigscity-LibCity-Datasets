@@ -1,5 +1,7 @@
 import time
 import os
+from datetime import datetime
+import dateutil.parser as dparser
 
 
 def timestamp_datetime(secs):
@@ -13,7 +15,7 @@ def datetime_timestamp(dt):
 
 
 def add_TZ(dt):
-    return time.strftime('%Y-%m-%dT%H:%M:%SZ', time.strptime(dt, '%Y-%m-%d %H:%M:%S'))
+    return dparser.parse(dt).strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
 def ensure_dir(dir_path):
