@@ -14,8 +14,16 @@ def datetime_timestamp(dt):
     return int(s)
 
 
-def add_TZ(dt):
-    return dparser.parse(dt).strftime('%Y-%m-%dT%H:%M:%SZ')
+def add_TZ(dt, with_timestamp=False):
+    dt = dparser.parse(dt)
+    time_str = dt.strftime('%Y-%m-%dT%H:%M:%SZ')
+    timestamp = dt.timestamp()
+    return time_str if not with_timestamp else (time_str, timestamp)
+
+
+def timestamp_to_str(timestamp):
+    dt = datetime.fromtimestamp(timestamp)
+    return dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 
 
 def ensure_dir(dir_path):
