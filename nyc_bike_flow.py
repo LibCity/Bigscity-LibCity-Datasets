@@ -28,11 +28,18 @@ def handle_point_geo(df):
 
 
 # TODO: optimize performance
-def judge_id(value, dividing_points):
-    for i, num in enumerate(dividing_points):
-        if value < num:
-            return i - 1
-    return len(dividing_points)
+def judge_id(value, dividing_points, equally=True):
+    if equally:
+        min_v = dividing_points[0]
+        interval = dividing_points[1] - dividing_points[0]
+        idx = int((value - min_v) / interval)
+        max_id = len(dividing_points) - 1
+        return min(max_id, idx)
+    else:
+        for i, num in enumerate(dividing_points):
+            if value < num:
+                return i - 1
+        return len(dividing_points)
 
 
 def partition_to_grid(point_geo, row_num, col_num):
@@ -112,12 +119,10 @@ def judge_time_id(df, time_dividing_point):
     return df
 
 
-def gen_flow_data(trajectory, time_dividing_point, row_num, col_num):
+def gen_flow_data(trajectory, time_dividing_point):
     """
     :param trajectory:
     :param time_dividing_point:
-    :param row_num:
-    :param col_num:
     :return: ['time', 'row_id', 'column_id', 'inflow', 'outflow']
     """
     tra_groups = trajectory.groupby(by='time_id')
@@ -129,18 +134,19 @@ def gen_flow_data(trajectory, time_dividing_point, row_num, col_num):
         flow_out.index.names = ['row_id', 'column_id']
         flow_out.columns = ['outflow']
         flow = flow_in.join(flow_out, how='outer', on=['row_id', 'column_id'])
-        flow = flow.fillna(value={'inflow': 0, 'outflow': 0})
         flow = flow.reset_index()
         flow['time'] = util.timestamp_to_str(t)
         yield flow
-        # flow_in = np.zeros((row_num, col_num), dtype=np.int)
-        # flow_out = np.zeros((row_num, col_num), dtype=np.int)
-        # for tra in tra_group:
-        #     flow_in[tra['row_id']][tra['column_id']] += 1
-        #     flow_out[tra['prev_row_id']][tra['prev_column_id']] += 1
-        # for rid, row_flow in enumerate(zip(flow_in, flow_out)):
-        #     for cid, flow in enumerate(zip(*row_flow)):
-        #         yield t, rid, cid, flow[0], flow[1]
+
+
+def fill_empty_flow(flow_data, time_dividing_point, row_num, col_num):
+    row_ids = list(range(0, row_num))
+    col_ids = list(range(0, col_num))
+    time_ids = list(map(util.timestamp_to_str, time_dividing_point))
+    ids = [(x, y, z) for x in row_ids for y in col_ids for z in time_ids]
+    flow_keep = pd.DataFrame(ids, columns=['row_id', 'column_id', 'time'])
+    flow_keep = pd.merge(flow_keep, flow_data, how='outer')
+    return flow_keep
 
 
 def calculate_flow(trajectory_data, point_geo, row_num, col_num, interval=3600, multi=False):
@@ -168,8 +174,10 @@ def calculate_flow(trajectory_data, point_geo, row_num, col_num, interval=3600, 
     else:
         bike_trajectory = judge_time_id(bike_trajectory, time_dividing_point)
 
-    flow_data_part = gen_flow_data(bike_trajectory, time_dividing_point, row_num, col_num)
+    flow_data_part = gen_flow_data(bike_trajectory, time_dividing_point)
     flow_data = pd.concat(flow_data_part)
+    flow_data = fill_empty_flow(flow_data, time_dividing_point, row_num, col_num)
+    flow_data = flow_data.fillna(value={'inflow': 0, 'outflow': 0})
     flow_data['type'] = 'state'
     flow_data = flow_data.reset_index(drop=True)
     flow_data['dyna_id'] = flow_data.index
@@ -196,19 +204,19 @@ def nyc_bike_flow(output_dir, dataset, row_num, col_num, interval=3600, multi=Fa
     flow_data.to_csv(data_name + '.grid', index=False)
     print('finish flow')
 
-    config = dict()
-    config['geo'] = dict()
-    config['geo']['including_types'] = ['Point']
-    config['geo']['Point'] = {'poi_name': 'other'}
-    config['usr'] = dict()
-    config['usr']['properties'] = {'usertype': 'other', 'birth_year': 'num', 'gender': 'num'}
-    config['rel'] = dict()
-    config['rel']['including_types'] = ['geo']
-    config['rel']['geo'] = {}
-    config['dyna'] = dict()
-    config['dyna']['including_types'] = ['od']
-    config['dyna']['od'] = {'entity_id': 'usr_id', 'od_id': 'rel_id', 'bikeid': 'other', 'trip_duration': 'num'}
-    json.dump(config, open(output_dir + '/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
+    # config = dict()
+    # config['geo'] = dict()
+    # config['geo']['including_types'] = ['Point']
+    # config['geo']['Point'] = {'poi_name': 'other'}
+    # config['usr'] = dict()
+    # config['usr']['properties'] = {'usertype': 'other', 'birth_year': 'num', 'gender': 'num'}
+    # config['rel'] = dict()
+    # config['rel']['including_types'] = ['geo']
+    # config['rel']['geo'] = {}
+    # config['dyna'] = dict()
+    # config['dyna']['including_types'] = ['od']
+    # config['dyna']['od'] = {'entity_id': 'usr_id', 'od_id': 'rel_id', 'bikeid': 'other', 'trip_duration': 'num'}
+    # json.dump(config, open(output_dir + '/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
 
 
 if __name__ == '__main__':
