@@ -3,18 +3,10 @@ import pandas as pd
 import json
 import sys
 import os
-# import util
-import h5py
-import pickle
-
-
-def ensure_dir(dir_path):
-    if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
-
+import util
 
 outputdir = 'output/LOS-LOOP-SMALL'
-ensure_dir(outputdir)
+util.ensure_dir(outputdir)
 
 dataurl = 'input/LOS-LOOP/'
 dataname = outputdir + '/LOS-LOOP-SMALL'
@@ -29,8 +21,8 @@ los_speed = pd.read_csv(dataurl + 'los_speed.csv')
 geo = []
 for i in range(len(geo_id_list)):
     #            id            type
-    geo.append([geo_id_list[i], 'LineString'])
-geo = pd.DataFrame(geo, columns=['geo_id', 'type'])
+    geo.append([geo_id_list[i], 'Point', '[]'])
+geo = pd.DataFrame(geo, columns=['geo_id', 'type', 'coordinates'])
 geo.to_csv(dataname + '.geo', index=False)
 
 # -------------------- Create .rel table--------------------------------------
@@ -40,7 +32,6 @@ rel = []
 rel_id_counter = 0
 for i in range(adj.shape[0]):
     for j in range(adj.shape[1]):
-        ###        'rel_id',       'type', 'origin_id',   'destination_id', 'link_weight'
         rel.append([rel_id_counter, 'geo', geo_id_list[i], geo_id_list[j], adj[i, j]])
         rel_id_counter += 1
 rel = pd.DataFrame(rel, columns=['rel_id', 'type', 'origin_id', 'destination_id', 'link_weight'])
@@ -99,8 +90,8 @@ dyna.to_csv(dataname + '.dyna', index=False)
 # --------------------------Create .json table---------------------------------------------
 config = dict()
 config['geo'] = dict()
-config['geo']['including_types'] = ['LineString']
-config['geo']['LineString'] = {}
+config['geo']['including_types'] = ['Point']
+config['geo']['Point'] = {}
 config['rel'] = dict()
 config['rel']['including_types'] = ['geo']
 config['rel']['geo'] = {'link_weight': 'num'}
