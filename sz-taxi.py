@@ -84,4 +84,10 @@ config['rel']['geo'] ={'link_weight': 'num'}
 config['dyna'] = dict()
 config['dyna']['including_types'] = ['state']
 config['dyna']['state'] = {'entity_id': 'geo_id', 'traffic_speed': 'num'}
+config['info'] = dict()
+config['info']['data_col'] = ['traffic_speed']
+config['info']['weight_col'] = 'link_weight'
+config['info']['data_files'] = ['SZ-TAXI']
+config['info']['geo_file'] = 'SZ-TAXI'
+config['info']['rel_file'] = 'SZ-TAXI'
 json.dump(config, open(outputdir+'/config.json', 'w', encoding='utf-8'), ensure_ascii=False)

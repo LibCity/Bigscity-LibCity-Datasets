@@ -76,8 +76,6 @@ config = dict()
 config['geo'] = dict()
 config['geo']['including_types'] = ['Point']
 config['geo']['Point'] = {}
-config['usr'] = dict()
-config['usr']['properties'] = {}
 config['rel'] = dict()
 config['rel']['including_types'] = ['geo']
 config['rel']['geo'] = {'cost': 'num'}
@@ -85,4 +83,10 @@ config['dyna'] = dict()
 config['dyna']['including_types'] = ['state']
 config['dyna']['state'] = {'entity_id': 'geo_id', 'traffic_flow': 'num',
                            'traffic_occupancy': 'num', 'traffic_speed': 'num'}
+config['info'] = dict()
+config['info']['data_col'] = ['traffic_flow', 'traffic_occupancy', 'traffic_speed']
+config['info']['weight_col'] = 'cost'
+config['info']['data_files'] = ['PEMSD4']
+config['info']['geo_file'] = 'PEMSD4'
+config['info']['rel_file'] = 'PEMSD4'
 json.dump(config, open(outputdir+'/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
