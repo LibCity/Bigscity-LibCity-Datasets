@@ -91,4 +91,9 @@ config['info']['weight_col'] = 'cost'
 config['info']['data_files'] = ['PEMSD7']
 config['info']['geo_file'] = 'PEMSD7'
 config['info']['rel_file'] = 'PEMSD7'
+config['info']['output_dim'] = 1
+config['info']['init_weight_inf_or_zero'] = 'zero'
+config['info']['set_weight_link_or_dist'] = 'link'
+config['info']['calculate_weight_adj'] = False
+config['info']['weight_adj_epsilon'] = 0.1
 json.dump(config, open(outputdir+'/config.json', 'w', encoding='utf-8'), ensure_ascii=False)

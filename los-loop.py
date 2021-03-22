@@ -104,4 +104,9 @@ config['info']['weight_col'] = 'link_weight'
 config['info']['data_files'] = ['LOS-LOOP']
 config['info']['geo_file'] = 'LOS-LOOP'
 config['info']['rel_file'] = 'LOS-LOOP'
+config['info']['output_dim'] = 1
+config['info']['init_weight_inf_or_zero'] = 'inf'
+config['info']['set_weight_link_or_dist'] = 'dist'
+config['info']['calculate_weight_adj'] = False
+config['info']['weight_adj_epsilon'] = 0.1
 json.dump(config, open(outputdir+'/config.json', 'w', encoding='utf-8'), ensure_ascii=False)

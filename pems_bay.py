@@ -91,4 +91,9 @@ config['info']['weight_col'] = 'cost'
 config['info']['data_files'] = ['PEMS_BAY']
 config['info']['geo_file'] = 'PEMS_BAY'
 config['info']['rel_file'] = 'PEMS_BAY'
+config['info']['output_dim'] = 1
+config['info']['init_weight_inf_or_zero'] = 'inf'
+config['info']['set_weight_link_or_dist'] = 'dist'
+config['info']['calculate_weight_adj'] = True
+config['info']['weight_adj_epsilon'] = 0.1
 json.dump(config, open(outputdir+'/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
