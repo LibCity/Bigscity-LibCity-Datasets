@@ -1,0 +1,4 @@
+numpy==1.19.4
+pandas==1.1.5
+flake8==3.3.0
+pep8-naming==0.4.1
