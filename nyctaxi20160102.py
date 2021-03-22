@@ -15,14 +15,14 @@ data_test = np.load(dataurl + 'taxi_test.npz')
 data_test_flow = data_test['flow']
 
 
-def get_Geo():
-    L = []
+def get_geo():
+    li = []
     ind = 0
     for x in range(16):
         for y in range(12):
-            L.append([ind, "Polygon", "[]", x, y])
+            li.append([ind, "Polygon", "[]", x, y])
             ind += 1
-    return L
+    return li
 
 
 def get_time(x):
@@ -79,28 +79,28 @@ def get_time(x):
                'T' + hour_str + ':30:00Z'
 
 
-def get_Dyan():
+def get_dyna():
     ind = 0
-    L = []
+    li = []
     for x in range(16):
         for y in range(12):
             for time in range(1920):
-                L.append([ind, "state", get_time(time), x, y,
+                li.append([ind, "state", get_time(time), x, y,
                           data_train_flow[time][x][y][0],
                           data_train_flow[time][x][y][1]])
                 ind += 1
             for time in range(960):
-                L.append([ind, "state", get_time(time+1920), x, y,
+                li.append([ind, "state", get_time(time+1920), x, y,
                           data_test_flow[time][x][y][0],
                           data_test_flow[time][x][y][1]])
                 ind += 1
-    return L
+    return li
 
 
-L0 = get_Geo()
+L0 = get_geo()
 pd.DataFrame(L0, columns=["geo_id", "type", "coordinates", "row_id",
                           "column_id"]).to_csv(dataname + '.geo', index=None)
-L1 = get_Dyan()
+L1 = get_dyna()
 pd.DataFrame(L1, columns=["dyna_id", "type", "time", "row_id",
                           "column_id", "inflow", "outflow"])\
     .to_csv(dataname + '.grid', index=None)

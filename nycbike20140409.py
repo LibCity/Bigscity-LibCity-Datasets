@@ -15,14 +15,14 @@ f = h5py.File(dataurl + 'NYC14_M16x8_T60_NewEnd.h5', 'r')
 data = np.array(f['data'])
 
 
-def get_Geo():
-    L = []
+def get_geo():
+    li = []
     ind = 0
     for x in range(16):
         for y in range(8):
-            L.append([ind, "Polygon", "[]", x, y])
+            li.append([ind, "Polygon", "[]", x, y])
             ind += 1
-    return L
+    return li
 
 
 def remove_imcomplete_days(data, timestamps, t=24):
@@ -77,23 +77,23 @@ date_df = pd.DataFrame(new_date)
 date_df['time'] = date_df[0].apply(del_date)
 
 
-def get_Dyan():
+def get_dyna():
     ind = 0
-    L = []
+    l = []
     for x in range(16):
         for y in range(8):
             for time in range(len(date_df['time'])):
-                L.append([ind, "state", date_df['time'][time],
+                l.append([ind, "state", date_df['time'][time],
                           x, y, new_data[time][0][x][y],
                           new_data[time][1][x][y]])
                 ind += 1
-    return L
+    return l
 
 
-L0 = get_Geo()
+L0 = get_geo()
 pd.DataFrame(L0, columns=["geo_id", "type", "coordinates", "row_id",
                           "column_id"]).to_csv(dataname + '.geo', index=False)
-L1 = get_Dyan()
+L1 = get_dyna()
 pd.DataFrame(L1, columns=["dyna_id", "type", "time", "row_id",
                           "column_id", "new_flow",
                           "end_flow"]).to_csv(dataname + '.grid', index=False)

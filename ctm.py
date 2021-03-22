@@ -14,14 +14,14 @@ data_test = np.load(dataurl + 'ctm_test.npz')
 data_test_data = data_test['data']
 
 
-def get_Geo():
-    L = []
+def get_geo():
+    li = []
     ind = 0
     for x in range(20):
         for y in range(21):
-            L.append([ind, "Polygon", "[]", x, y])
+            li.append([ind, "Polygon", "[]", x, y])
             ind += 1
-    return L
+    return li
 
 
 def get_time(x):
@@ -130,30 +130,30 @@ def get_time(x):
                + 'T' + hour_str + ':45:00Z'
 
 
-def get_Dyan():
+def get_dyna():
     ind = 0
-    L = []
+    li = []
     for x in range(20):
         for y in range(21):
             for time in range(2880):
-                L.append([ind, "state", get_time(time),
+                li.append([ind, "state", get_time(time),
                           x, y, data_train_data[time][x][y][0],
                           data_train_data[time][x][y][1]])
                 ind += 1
             for time in range(1440):
-                L.append([ind, "state", get_time(time + 2880),
+                li.append([ind, "state", get_time(time + 2880),
                           x, y, data_test_data[time][x][y][0],
                           data_test_data[time][x][y][1]])
                 ind += 1
-    return L
+    return li
 
 
-L0 = get_Geo()
+L0 = get_geo()
 pd.DataFrame(L0, columns=["geo_id", "type", "coordinates", "row_id",
                           "column_id"]).\
     to_csv(dataname + '.geo', index=None)
 print("finish geo")
-L1 = get_Dyan()
+L1 = get_dyna()
 pd.DataFrame(L1, columns=["dyna_id", "type", "time", "row_id",
                           "column_id", "duration", "request number"]).\
     to_csv(dataname + '.grid', index=None)

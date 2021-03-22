@@ -71,14 +71,14 @@ new_date4, new_data4 = remove_imcomplete_days(np.array(f4['data']),
 date_df4 = pd.DataFrame(new_date4)
 
 
-def get_Geo():
-    L = []
+def get_geo():
+    li = []
     ind = 0
     for x in range(32):
         for y in range(32):
-            L.append([ind, "Polygon", "[]", x, y])
+            li.append([ind, "Polygon", "[]", x, y])
             ind += 1
-    return L
+    return li
 
 
 def del_date(date):
@@ -114,73 +114,73 @@ date_df3['time'] = date_df3[0].apply(del_date)
 date_df4['time'] = date_df4[0].apply(del_date)
 
 
-def get_Dyan1():
+def get_dyna1():
     ind = 0
-    L = []
+    li = []
     for x in range(32):
         for y in range(32):
             for time in range(len(date_df1['time'])):
-                L.append([ind, "state", date_df1['time'][time], x, y,
+                li.append([ind, "state", date_df1['time'][time], x, y,
                           new_data1[time][0][x][y], new_data1[time][1][x][y]])
                 ind += 1
-    return L
+    return li
 
 
-def get_Dyan2():
+def get_dyna2():
     ind = 0
-    L = []
+    li = []
     for x in range(32):
         for y in range(32):
             for time in range(len(date_df2['time'])):
-                L.append([ind, "state", date_df2['time'][time], x, y,
+                li.append([ind, "state", date_df2['time'][time], x, y,
                           new_data2[time][0][x][y], new_data2[time][1][x][y]])
                 ind += 1
-    return L
+    return li
 
 
-def get_Dyan3():
+def get_dyna3():
     ind = 0
-    L = []
+    li = []
     for x in range(32):
         for y in range(32):
             for time in range(len(date_df3['time'])):
-                L.append([ind, "state", date_df3['time'][time], x, y,
+                li.append([ind, "state", date_df3['time'][time], x, y,
                           new_data3[time][0][x][y], new_data3[time][1][x][y]])
                 ind += 1
-    return L
+    return li
 
 
-def get_Dyan4():
+def get_dyna4():
     ind = 0
-    L = []
+    li = []
     for x in range(32):
         for y in range(32):
             for time in range(len(date_df4['time'])):
-                L.append([ind, "state", date_df4['time'][time], x, y,
+                li.append([ind, "state", date_df4['time'][time], x, y,
                           new_data4[time][0][x][y], new_data4[time][1][x][y]])
                 ind += 1
-    return L
+    return li
 
 
-L_a = get_Geo()
+L_a = get_geo()
 pd.DataFrame(L_a, columns=["geo_id", "type", "coordinates", "row_id",
                            "column_id"]).\
     to_csv(outputdir + '/TAXIBJ' + '.geo', index=None)
 
 
-L_2013_b = get_Dyan1()
+L_2013_b = get_dyna1()
 pd.DataFrame(L_2013_b, columns=["dyna_id", "type", "time", "row_id",
                                 "column_id", "inflow", "outflow"]).\
     to_csv(dataname1 + '.grid', index=None)
-L_2014_b = get_Dyan2()
+L_2014_b = get_dyna2()
 pd.DataFrame(L_2014_b, columns=["dyna_id", "type", "time", "row_id",
                                 "column_id", "inflow", "outflow"]).\
     to_csv(dataname2 + '.grid', index=None)
-L_2015_b = get_Dyan3()
+L_2015_b = get_dyna3()
 pd.DataFrame(L_2015_b, columns=["dyna_id", "type", "time", "row_id",
                                 "column_id", "inflow", "outflow"]).\
     to_csv(dataname3 + '.grid', index=None)
-L_2016_b = get_Dyan4()
+L_2016_b = get_dyna4()
 pd.DataFrame(L_2016_b, columns=["dyna_id", "type", "time", "row_id",
                                 "column_id", "inflow", "outflow"]).\
     to_csv(dataname4 + '.grid', index=None)
