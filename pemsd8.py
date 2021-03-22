@@ -1,7 +1,6 @@
 import numpy as np
 import pandas as pd
 import json
-import os
 import util
 
 
@@ -55,7 +54,7 @@ while start_time < end_time:
 dyna_id = 0
 dyna_file = open(dataname+'.dyna', 'w')
 dyna_file.write('dyna_id' + ',' + 'type' + ',' + 'time' + ',' + 'entity_id'
-                + ',' + 'traffic_flow' + ',' + 'traffic_occupancy'+ ',' + 'traffic_speed' + '\n')
+                + ',' + 'traffic_flow' + ',' + 'traffic_occupancy' + ',' + 'traffic_speed' + '\n')
 for j in range(dataset.shape[1]):
     entity_id = j  # 这个数据集的id是0-306
     for i in range(len(timeslot)):

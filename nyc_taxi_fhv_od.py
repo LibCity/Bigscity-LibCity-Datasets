@@ -1,10 +1,8 @@
-import numpy as np
 import pandas as pd
 import geopandas as gpd
 from shapely import wkt
 import geojson
 import json
-import os
 import util
 
 
@@ -36,8 +34,8 @@ geo.to_csv(dataname+'.geo', index=False)
 
 dataset = pd.read_csv(dataurl, low_memory=False)
 # 有意义的ID有范围[1,263]
-dataset = dataset[(dataset['PULocationID']<=263) & (dataset['PULocationID']>0)
-                  & (dataset['DOLocationID']<=263) & (dataset['DOLocationID']>0)]
+dataset = dataset[(dataset['PULocationID'] <= 263) & (dataset['PULocationID'] > 0)
+                  & (dataset['DOLocationID'] <= 263) & (dataset['DOLocationID'] > 0)]
 # 去空值
 dataset = dataset.drop('SR_Flag', axis=1)
 # dataset = dataset[~dataset.isnull().T.any()]

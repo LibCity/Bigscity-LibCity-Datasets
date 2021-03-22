@@ -1,9 +1,7 @@
-import os
 import json
 import util
 import pandas as pd
 import numpy as np
-import pickle
 
 # 输出文件所在的目录
 output_dir = 'output/Loop Seattle'

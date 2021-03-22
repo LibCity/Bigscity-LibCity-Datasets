@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 import json
 import sys
-import os
 import util
 
 outputdir = 'output/LOS-LOOP-SMALL'
@@ -48,7 +47,7 @@ dyna_id_counter = 0
 def num2time(num):
     if num < 288 * 31:
         month = 3
-        day = (num) // 288 + 1
+        day = num // 288 + 1
     elif num < 288 * (31 + 30):
         month = 4
         day = (num - 288 * 31) // 288 + 1
@@ -62,7 +61,7 @@ def num2time(num):
     hour = (num % 288) // 12
     minute = num % 12
 
-    if (day > 31):
+    if day > 31:
         print(num)
         sys.exit()
     month += 2
@@ -71,7 +70,7 @@ def num2time(num):
     hour = str(hour) if hour > 9 else '0' + str(hour)
     minute = str(5 * minute) if 5 * minute > 9 else '0' + str(5 * minute)
 
-    if (minute == '01'):
+    if minute == '01':
         print(num)
         sys.exit()
     time = '2012-' + month + '-' + day + 'T' + hour + ':' + minute + ':' + '00Z'

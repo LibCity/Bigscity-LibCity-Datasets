@@ -12,7 +12,7 @@ def datetime_timestamp(dt):
     return int(s)
 
 
-def add_TZ(dt):
+def add_tz(dt):
     return time.strftime('%Y-%m-%dT%H:%M:%SZ', time.strptime(dt, '%Y-%m-%d %H:%M:%S'))
 
 
