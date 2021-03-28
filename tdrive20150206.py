@@ -32,7 +32,7 @@ for r in range(rows):
     for c in range(cols):
         _x0, _y0 = c * size_x + x0, (rows - r - 1) * size_y + y0
         _x1, _y1 = (c + 1) * size_x + x0, (rows - r) * size_y + y0
-        grids += [[[_y1, _x0], [_y1, _x1], [_y0, _x1], [_y0, _x0]]]
+        grids += [[[_x0, _y1], [_x1, _y1], [_x1, _y0], [_x0, _y0], [_x0, _y1]]]
 
 geo_dataset = load_h5(dataurl + 'BJ_FEATURE.h5', ['embeddings'])
 geo = []
