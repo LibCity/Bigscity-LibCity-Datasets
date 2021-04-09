@@ -87,7 +87,8 @@ def partition_to_grid(point_geo, row_num, col_num):
     lat_values = point_geo['poi_lat'].values
     lat_diff = lat_values[-1] - lat_values[0]
     lat_dividing_points = \
-        [round(lat_values[0] + lat_diff / row_num * i, 3) for i in range(row_num + 1)]
+        [round(lat_values[0] + lat_diff / row_num * i, 3)
+         for i in range(row_num + 1)]
     # print(len(lat_dividing_points))
     point_geo['row_id'] = point_geo.apply(
         lambda x: judge_id(x['poi_lat'], lat_dividing_points),
@@ -99,7 +100,8 @@ def partition_to_grid(point_geo, row_num, col_num):
     lon_values = point_geo['poi_lon'].values
     lon_diff = lon_values[-1] - lon_values[0]
     lon_dividing_points = \
-        [round(lon_values[0] + lon_diff / col_num * i, 3) for i in range(col_num + 1)]
+        [round(lon_values[0] + lon_diff / col_num * i, 3)
+         for i in range(col_num + 1)]
     point_geo['column_id'] = point_geo.apply(
         lambda x: judge_id(x['poi_lon'], lon_dividing_points),
         axis=1
@@ -285,6 +287,9 @@ def calculate_flow(
     # 改列名
     bike_trajectory = bike_trajectory.rename(
         columns={'s_id': 's_id_n'})
+    bike_trajectory = bike_trajectory[
+        (bike_trajectory.prev_row_id != bike_trajectory.row_id) |
+        (bike_trajectory.prev_column_id != bike_trajectory.column_id)]
     # bike_trajectory.to_csv('output/NYC_BIKE_flow_test/NYC_BIKE_bike_traj_merge.csv')
     # 将自行车路线表根据timestamp排序
     bike_trajectory = bike_trajectory.sort_values(by='timestamp')
@@ -430,9 +435,11 @@ if __name__ == '__main__':
     # 列数
     column_num = 8
     # 输出文件名称
-    file_name = 'NYCBIKE%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    file_name = 'NYCBIKE%d%02d-%d%02d' \
+                % (start_year, start_month, end_year, end_month)
     # 输出文件夹名称
-    output_dir_flow = 'output/NYCBIKE%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    output_dir_flow = 'output/NYCBIKE%d%02d-%d%02d' \
+                      % (start_year, start_month, end_year, end_month)
     # 输入文件夹名称
     input_dir_flow = 'input/NYC-Bike'
     # 生成待处理的数据文件名
