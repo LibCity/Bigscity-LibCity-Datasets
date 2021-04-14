@@ -53,6 +53,13 @@ def handle_point_geo(df):
     station_data.rename(columns={'s_name': 'poi_name',
                                  's_lat': 'poi_lat', 's_lon': 'poi_lon'},
                         inplace=True)
+
+    station_data = station_data.loc[
+        station_data['poi_lat'].apply(
+            lambda x: x != 0 and x is not None and not math.isnan(x))]
+    station_data = station_data.loc[
+        station_data['poi_lon'].apply(
+            lambda x: x != 0 and x is not None and not math.isnan(x))]
     # 确认只存在这些列
     station_data = station_data[['s_id', 'poi_name', 'poi_lat', 'poi_lon']]
     # 排序
@@ -211,6 +218,9 @@ def gen_flow_data1(trajectory, time_dividing_point):
     :param time_dividing_point:
     :return: ['time', 'row_id', 'column_id', 'inflow', 'outflow']
     """
+    trajectory = trajectory[
+        (trajectory.prev_row_id != trajectory.row_id) |
+        (trajectory.prev_column_id != trajectory.column_id)]
     tra_groups = trajectory.groupby(by='time_id')
     for tra_group in tra_groups:
         tra_group = tra_group[1]
