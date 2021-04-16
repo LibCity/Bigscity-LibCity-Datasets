@@ -108,6 +108,7 @@ config['info']['data_col'] = ['departing_volume', 'arriving_volume']
 config['info']['data_files'] = ['NYCBike20160708']
 config['info']['geo_file'] = 'NYCBike20160708'
 config['info']['output_dim'] = 2
+config['info']['time_intervals'] = 1800
 config['info']['init_weight_inf_or_zero'] = 'inf'
 config['info']['set_weight_link_or_dist'] = 'dist'
 config['info']['calculate_weight_adj'] = False

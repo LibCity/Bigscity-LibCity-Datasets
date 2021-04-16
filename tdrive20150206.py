@@ -100,6 +100,7 @@ config['info']['data_files'] = ['T-Drive20150206']
 config['info']['geo_file'] = 'T-Drive20150206'
 config['info']['rel_file'] = 'T-Drive20150206'
 config['info']['output_dim'] = 2
+config['info']['time_intervals'] = 3600
 config['info']['init_weight_inf_or_zero'] = 'inf'
 config['info']['set_weight_link_or_dist'] = 'dist'
 config['info']['calculate_weight_adj'] = False

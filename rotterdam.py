@@ -109,6 +109,7 @@ config['info']['data_col'] = 'traffic_speed'
 config['info']['data_files'] = ['Rotterdam']
 config['info']['geo_file'] = 'Rotterdam'
 config['info']['output_dim'] = 1
+config['info']['time_intervals'] = 120
 config['info']['init_weight_inf_or_zero'] = 'inf'
 config['info']['set_weight_link_or_dist'] = 'dist'
 config['info']['calculate_weight_adj'] = False

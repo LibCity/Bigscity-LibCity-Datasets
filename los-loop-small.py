@@ -104,6 +104,7 @@ config['info']['data_files'] = ['LOS-LOOP-SMALL']
 config['info']['geo_file'] = 'LOS-LOOP-SMALL'
 config['info']['rel_file'] = 'LOS-LOOP-SMALL'
 config['info']['output_dim'] = 1
+config['info']['time_intervals'] = 300
 config['info']['init_weight_inf_or_zero'] = 'inf'
 config['info']['set_weight_link_or_dist'] = 'dist'
 config['info']['calculate_weight_adj'] = False

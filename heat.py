@@ -65,6 +65,7 @@ config['info']['data_files'] = ['HEAT', 'HEAT_M']
 config['info']['geo_file'] = 'HEAT'
 config['info']['rel_file'] = 'HEAT'
 config['info']['output_dim'] = 1
+config['info']['time_intervals'] = None
 config['info']['init_weight_inf_or_zero'] = 'inf'
 config['info']['set_weight_link_or_dist'] = 'dist'
 config['info']['calculate_weight_adj'] = False
