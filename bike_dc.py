@@ -499,7 +499,7 @@ def gen_config_grid(row_num, column_num):
     return grid
 
 
-def gen_config_info(file_name):
+def gen_config_info(file_name, interval):
     info = \
         {
             "data_col": [
@@ -514,17 +514,18 @@ def gen_config_info(file_name):
             "init_weight_inf_or_zero": "inf",
             "set_weight_link_or_dist": "dist",
             "calculate_weight_adj": False,
-            "weight_adj_epsilon": 0.1
+            "weight_adj_epsilon": 0.1,
+            "time_intervals": interval,
         }
     return info
 
 
-def gen_config(output_dir_flow, file_name, row_num, column_num):
+def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
     config = {}
     data = json.loads(json.dumps(config))
     data["geo"] = gen_config_geo()
     data["grid"] = gen_config_grid(row_num, column_num)
-    data["info"] = gen_config_info(file_name)
+    data["info"] = gen_config_info(file_name, interval)
     config = json.dumps(data)
     with open(output_dir_flow + "/config.json", "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
@@ -536,10 +537,10 @@ if __name__ == '__main__':
     # 参数
     # 时间间隔
     interval = 3600
-    # 开始年月
-    (start_year, start_month) = (2021, 3)
-    # 结束年月
-    (end_year, end_month) = (2021, 3)
+    # 开始年月日
+    (start_year, start_month, start_day) = (2021, 3, 1)
+    # 结束年月日
+    (end_year, end_month, end_day) = (2021, 3, 31)
     # 行数
     row_num = 16
     # 列数
@@ -585,6 +586,13 @@ if __name__ == '__main__':
                                                      ])
     # data_set_dc[data_set_dc.isnull().values is True].to_csv('test_null.csv')
 
+    # 过滤不属于时间范围内的记录
+    start_str = '%d-%02d-%02d' % (start_year, start_month, start_day)
+    end_str = '%d-%02d-%02d' % (end_year, end_month, end_day)
+
+    data_set_dc = data_set_dc.loc[data_set_dc['starttime'].apply(lambda x: end_str >= x.split(" ")[0] >= start_str)]
+    data_set_dc = data_set_dc.loc[data_set_dc['stoptime'].apply(lambda x: end_str >= x.split(" ")[0] >= start_str)]
+
     # 调用处理函数，生成.grid 和.geo文件
     dc_bike_flow(
         output_dir_flow,
@@ -596,6 +604,6 @@ if __name__ == '__main__':
     )
 
     # 生成config.json文件
-    gen_config(output_dir_flow, file_name, row_num, column_num)
+    gen_config(output_dir_flow, file_name, row_num, column_num, interval)
 
     print('finish')
