@@ -9,14 +9,33 @@ old_time_format = '%Y-%m-%d %H:%M:%S'
 new_time_format = '%Y-%m-%dT%H:%M:%SZ'
 
 
+def get_data_url(input_dir_flow, start_year, start_month, end_year, end_month):
+    pattern = input_dir_flow + "/green_tripdata_%d-%02d.csv"
+
+    data_url = []
+
+    i = start_year
+    while i <= end_year:
+        j = start_month if i == start_year else 1
+        end_j = end_month if i == end_year else 12
+
+        while j <= end_j:
+            data_url.append(pattern % (i, j))
+            j += 1
+
+        i += 1
+
+    return data_url
+
+
 def handle_point_geo(df):
     """
     :param df:
     :return: df['geo_id', 'poi_lat', 'poi_lon']
     """
-    start = df[['start_location_lat', 'start_location_long']]
+    start = df[['Pickup_latitude', 'Pickup_longitude']]
     start.columns = ['s_lat', 's_lon']
-    end = df[['end_location_lat', 'end_location_long']]
+    end = df[['Dropoff_latitude', 'Dropoff_longitude']]
     end.columns = ['s_lat', 's_lon']
     station_data = pd.concat((start, end), axis=0)
     station_data = station_data.drop_duplicates()
@@ -104,7 +123,7 @@ def convert_time(df):
         axis=1)
     df['timestamp'] = df.apply(
         lambda x: float(datetime.timestamp(
-            pd.to_datetime(x['time_str'][:-6],
+            pd.to_datetime(x['time_str'],
                            utc=True,
                            format=old_time_format))),
         axis=1)
@@ -114,23 +133,23 @@ def convert_time(df):
 def convert_to_trajectory(df):
     """
     :param df: all data
-    :return: df['riderid', 'poi_lon', 'poi_lat', 'time', 'timestamp']
+    :return: df['driveid', 'poi_lon', 'poi_lat', 'time', 'timestamp']
     """
-    start = df[['rider_id', 'start_location_long', 'start_location_lat', 'started_on']]
-    start.columns = ['riderid', 'poi_lon', 'poi_lat', 'time_str']
-    end = df[['rider_id', 'end_location_long', 'end_location_lat', 'completed_on']]
-    end.columns = ['riderid', 'poi_lon', 'poi_lat', 'time_str']
+    start = df[['drive_id', 'Pickup_longitude', 'Pickup_latitude', 'lpep_pickup_datetime']]
+    start.columns = ['driveid', 'poi_lon', 'poi_lat', 'time_str']
+    end = df[['drive_id', 'Dropoff_longitude', 'Dropoff_latitude', 'Lpep_dropoff_datetime']]
+    end.columns = ['driveid', 'poi_lon', 'poi_lat', 'time_str']
     trajectory_data = pd.concat((start, end), axis=0)
     trajectory_data = convert_time(trajectory_data)
     trajectory_data = trajectory_data.loc[trajectory_data['poi_lat'].apply(lambda x: x != 0)]
     trajectory_data = trajectory_data.loc[trajectory_data['poi_lon'].apply(lambda x: x != 0)]
-    return trajectory_data[['riderid', 'poi_lon', 'poi_lat', 'time', 'timestamp']]
+    return trajectory_data[['driveid', 'poi_lon', 'poi_lat', 'time', 'timestamp']]
 
 
-def add_previous_poi(tra_by_bike):
-    tra_by_bike = tra_by_bike.sort_values(by='time')
-    tra_by_bike['prev_geo_id'] = tra_by_bike['geo_id'].shift(1)
-    return tra_by_bike[1:]
+def add_previous_poi(tra_by_taxi):
+    tra_by_taxi = tra_by_taxi.sort_values(by='time')
+    tra_by_taxi['prev_geo_id'] = tra_by_taxi['geo_id'].shift(1)
+    return tra_by_taxi[1:]
 
 
 def judge_time_id(df, time_dividing_point):
@@ -186,20 +205,20 @@ def fill_empty_flow(flow_data, time_dividing_point, row_num, col_num):
 def calculate_flow(
         trajectory_data, point_geo, row_num, col_num, interval):
     point_geo = point_geo[['geo_id', 'row_id', 'column_id']]
-    bike_trajectory = trajectory_data.groupby(by='riderid')
-    bike_trajectory = pd.concat(map(lambda x: add_previous_poi(x[1]), bike_trajectory))
-    bike_trajectory = bike_trajectory[bike_trajectory['geo_id'] != bike_trajectory['prev_geo_id']]
+    taxi_trajectory = trajectory_data.groupby(by='driveid')
+    taxi_trajectory = pd.concat(map(lambda x: add_previous_poi(x[1]), taxi_trajectory))
+    taxi_trajectory = taxi_trajectory[taxi_trajectory['geo_id'] != taxi_trajectory['prev_geo_id']]
 
-    bike_trajectory = pd.merge(bike_trajectory, point_geo,
+    taxi_trajectory = pd.merge(taxi_trajectory, point_geo,
                                left_on='prev_geo_id', right_on='geo_id', suffixes=['', '_p'])
 
-    bike_trajectory = bike_trajectory.sort_values(by='timestamp')
-    min_timestamp = int(math.floor(bike_trajectory['timestamp'].values[0] / interval) * interval)
-    max_timestamp = int(math.ceil(bike_trajectory['timestamp'].values[-1] / interval) * interval)
+    taxi_trajectory = taxi_trajectory.sort_values(by='timestamp')
+    min_timestamp = int(math.floor(taxi_trajectory['timestamp'].values[0] / interval) * interval)
+    max_timestamp = int(math.ceil(taxi_trajectory['timestamp'].values[-1] / interval) * interval)
     time_dividing_point = list(range(min_timestamp, max_timestamp, interval))
-    bike_trajectory = judge_time_id(bike_trajectory, time_dividing_point)
+    taxi_trajectory = judge_time_id(taxi_trajectory, time_dividing_point)
 
-    flow_data_part = gen_flow_data(bike_trajectory, time_dividing_point)
+    flow_data_part = gen_flow_data(taxi_trajectory, time_dividing_point)
     flow_data = pd.concat(flow_data_part)
     flow_data = fill_empty_flow(flow_data, time_dividing_point, row_num, col_num)
     flow_data = flow_data.fillna(value={'inflow': 0, 'outflow': 0})
@@ -211,7 +230,7 @@ def calculate_flow(
     return flow_data
 
 
-def austin_bike_flow(
+def nyc_taxi_flow(
         output_dir, output_name, data_set, row_num, col_num, interval=3600):
     data_name = output_dir + "/" + output_name
 
@@ -296,38 +315,42 @@ def gen_config(output_dir_flow, file_name, row_num, column_num):
 
 if __name__ == '__main__':
     interval = 3600
-    (start_year, start_month, start_day) = (2017, 1, 1)
-    (end_year, end_month, end_day) = (2017, 1, 31)
-    row_num = 16
-    column_num = 8
+    (start_year, start_month) = (2014, 1)
+    (end_year, end_month) = (2014, 1)
+    row_num = 10
+    column_num = 20
 
-    file_name = 'AUSTINRIDE%d%02d%02d-%d%02d%02d' % \
-                (start_year, start_month, start_day, end_year, end_month, end_day)
-    output_dir_flow = 'output/AUSTINRIDE%d%02d%02d-%d%02d%02d' % \
-                      (start_year, start_month, start_day, end_year, end_month, end_day)
-    input_dir_flow = 'input/AUSTINRIDE'
-    data_url = [input_dir_flow + "/Rides_DataA.csv"]
+    file_name = 'NYCTAXI%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    output_dir_flow = 'output/NYCTAXI%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    input_dir_flow = 'input/NYC-Taxi'
+    data_url = get_data_url(input_dir_flow=input_dir_flow,
+                            start_year=start_year,
+                            start_month=start_month,
+                            end_year=end_year,
+                            end_month=end_month
+                            )
     data_url = tuple(data_url)
     if not os.path.exists(output_dir_flow):
         os.makedirs(output_dir_flow)
 
-    dataset_austin = pd.concat(
-        map(lambda x: pd.read_csv(x), data_url),
-        axis=0
+    dataset_nyc = pd.concat(
+        map(lambda x: pd.read_csv(x, index_col=False), data_url), axis=0
     )
-    start_str = '%d-%02d-%02d' % (start_year, start_month, start_day)
-    end_str = '%d-%02d-%02d' % (end_year, end_month, end_day)
-    dataset_austin = \
-        dataset_austin.loc[dataset_austin['started_on'].apply(lambda x: end_str >= x.split(" ")[0] >= start_str)]
-    dataset_austin = \
-        dataset_austin.loc[dataset_austin['completed_on'].apply(lambda x: end_str >= x.split(" ")[0] >= start_str)]
-    dataset_austin.reset_index(drop=True, inplace=True)
+    dataset_nyc.reset_index(drop=True, inplace=True)
+    data_num = dataset_nyc.shape[0]
+    dataset_nyc["drive_id"] = list(range(data_num))
+    dataset_nyc = dataset_nyc.loc[dataset_nyc['lpep_pickup_datetime'].
+        apply(lambda x:
+              '%d-%02d-%02d' % (end_year, end_month, 30) >= x[:10] >= '%d-%02d-%02d' % (start_year, start_month, 1))]
+    dataset_nyc = dataset_nyc.loc[dataset_nyc['Lpep_dropoff_datetime'].
+        apply(lambda x:
+              '%d-%02d-%02d' % (end_year, end_month, 30) >= x[:10] >= '%d-%02d-%02d' % (start_year, start_month, 1))]
     print('finish read csv')
 
-    austin_bike_flow(
+    nyc_taxi_flow(
         output_dir_flow,
         file_name,
-        dataset_austin,
+        dataset_nyc,
         row_num,
         column_num,
         interval=interval
