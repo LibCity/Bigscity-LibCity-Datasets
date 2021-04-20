@@ -120,6 +120,7 @@ config['info']['data_files'] = ['SHMetro']
 config['info']['geo_file'] = 'SHMetro'
 config['info']['rel_file'] = 'SHMetro'
 config['info']['output_dim'] = 2
+config['info']['time_intervals'] = 900
 config['info']['init_weight_inf_or_zero'] = 'inf'
 config['info']['set_weight_link_or_dist'] = 'dist'
 config['info']['calculate_weight_adj'] = False

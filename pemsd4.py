@@ -89,6 +89,7 @@ config['info']['data_files'] = ['PEMSD4']
 config['info']['geo_file'] = 'PEMSD4'
 config['info']['rel_file'] = 'PEMSD4'
 config['info']['output_dim'] = 3
+config['info']['time_intervals'] = 300
 config['info']['init_weight_inf_or_zero'] = 'zero'
 config['info']['set_weight_link_or_dist'] = 'link'
 config['info']['calculate_weight_adj'] = False

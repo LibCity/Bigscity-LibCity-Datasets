@@ -275,6 +275,7 @@ config['info']['geo_file'] = 'BEIJING SUBWAY_10MIN'
 config['info']['rel_file'] = 'BEIJING SUBWAY_10MIN'
 config['info']['ext_file'] = 'BEIJING SUBWAY_10MIN'
 config['info']['output_dim'] = 2
+config['info']['time_intervals'] = 600
 config['info']['init_weight_inf_or_zero'] = 'inf'
 config['info']['set_weight_link_or_dist'] = 'dist'
 config['info']['calculate_weight_adj'] = False
@@ -285,10 +286,12 @@ config['info']['data_files'] = ['BEIJING SUBWAY_15MIN']
 config['info']['geo_file'] = 'BEIJING SUBWAY_15MIN'
 config['info']['rel_file'] = 'BEIJING SUBWAY_15MIN'
 config['info']['ext_file'] = 'BEIJING SUBWAY_15MIN'
+config['info']['time_intervals'] = 900
 json.dump(config, open(outputdir15 + '/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
 
 config['info']['data_files'] = ['BEIJING SUBWAY_30MIN']
 config['info']['geo_file'] = 'BEIJING SUBWAY_30MIN'
 config['info']['rel_file'] = 'BEIJING SUBWAY_30MIN'
 config['info']['ext_file'] = 'BEIJING SUBWAY_30MIN'
+config['info']['time_intervals'] = 1800
 json.dump(config, open(outputdir30 + '/config.json', 'w', encoding='utf-8'), ensure_ascii=False)

@@ -82,6 +82,7 @@ config['info']['data_files'] = ['PeMSD7(M)']
 config['info']['geo_file'] = 'PeMSD7(M)'
 config['info']['rel_file'] = 'PeMSD7(M)'
 config['info']['output_dim'] = 1
+config['info']['time_intervals'] = 300
 config['info']['init_weight_inf_or_zero'] = 'inf'
 config['info']['set_weight_link_or_dist'] = 'dist'
 config['info']['calculate_weight_adj'] = True

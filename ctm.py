@@ -173,6 +173,7 @@ config['info']['data_col'] = ['durations', 'request number']
 config['info']['data_files'] = ['CTM']
 config['info']['geo_file'] = 'CTM'
 config['info']['output_dim'] = 2
+config['info']['time_intervals'] = 900
 config['info']['init_weight_inf_or_zero'] = 'inf'
 config['info']['set_weight_link_or_dist'] = 'dist'
 config['info']['calculate_weight_adj'] = False

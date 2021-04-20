@@ -191,6 +191,7 @@ config['info']['data_files'] = ['Q-TRAFFIC']
 config['info']['geo_file'] = 'Q-TRAFFIC'
 config['info']['rel_file'] = 'Q-TRAFFIC'
 config['info']['output_dim'] = 1
+config['info']['time_intervals'] = 900
 config['info']['init_weight_inf_or_zero'] = 'zero'
 config['info']['set_weight_link_or_dist'] = 'link'
 config['info']['calculate_weight_adj'] = False
