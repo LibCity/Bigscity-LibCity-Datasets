@@ -136,7 +136,6 @@ def gen_empty_od_data(area, time_dividing_point):
     od_data = pd.DataFrame(columns=['od_id', 'type', 'time',
                                     'origin_id', 'destination_id', 'flow'])
     a_ids = area['a_id']
-    a_ids = range(1, 6)
     for ori_id in a_ids:
         for des_id in a_ids:
             for t in time_dividing_point:
