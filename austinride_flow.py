@@ -261,7 +261,7 @@ def gen_config_grid(row_num, column_num):
     return grid
 
 
-def gen_config_info(file_name):
+def gen_config_info(file_name, interval):
     info = \
         {
             "data_col": [
@@ -277,17 +277,17 @@ def gen_config_info(file_name):
             "set_weight_link_or_dist": "dist",
             "calculate_weight_adj": False,
             "weight_adj_epsilon": 0.1,
-            "time_intervals": 1800
+            "time_intervals": interval
         }
     return info
 
 
-def gen_config(output_dir_flow, file_name, row_num, column_num):
+def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
     config = {}
     data = json.loads(json.dumps(config))
     data["geo"] = gen_config_geo()
     data["grid"] = gen_config_grid(row_num, column_num)
-    data["info"] = gen_config_info(file_name)
+    data["info"] = gen_config_info(file_name, interval)
     config = json.dumps(data)
     with open(output_dir_flow + "/config.json", "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
@@ -334,4 +334,4 @@ if __name__ == '__main__':
     )
     print('finish')
 
-    gen_config(output_dir_flow, file_name, row_num, column_num)
+    gen_config(output_dir_flow, file_name, row_num, column_num, interval)
