@@ -90,7 +90,7 @@ def partition_to_grid(data_set, row_num, col_num):
 
 def convert_time(df):
     df['time'] = df.apply(
-        lambda x: x['time_str'].replace(' ', 'T') + 'Z',
+        lambda x: x['date_time'].replace(' ', 'T') + 'Z',
         axis=1)
     df['timestamp'] = df.apply(
         lambda x: float(datetime.timestamp(
@@ -333,9 +333,9 @@ if __name__ == '__main__':
     # 参数
     # 测试时选取的taxi数量
     test_taxi_num = TAXI_NUM
-    # test_taxi_num = 10
+    # test_taxi_num = 500
     # 时间间隔
-    interval = 3600
+    interval = 1800
     # 开始年月
     (start_year, start_month, start_day) = (2008, 2, 2)
     # 结束年月
