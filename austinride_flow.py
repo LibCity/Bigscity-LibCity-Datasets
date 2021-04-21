@@ -23,8 +23,8 @@ def handle_point_geo(df):
     station_data.rename(columns={'s_lat': 'poi_lat', 's_lon': 'poi_lon'},
                         inplace=True)
 
-    station_data = station_data.loc[station_data['poi_lat'].apply(lambda x: x != 0)]
-    station_data = station_data.loc[station_data['poi_lon'].apply(lambda x: x != 0)]
+    station_data = station_data.loc[station_data['poi_lat'].apply(lambda x: x != 0 and x is not None and not math.isnan(x))]
+    station_data = station_data.loc[station_data['poi_lon'].apply(lambda x: x != 0 and x is not None and not math.isnan(x))]
     station_num = station_data.shape[0]
     station_data.loc[:, 'geo_id'] = range(0, station_num)
     station_data = station_data[['geo_id', 'poi_lat', 'poi_lon']]
@@ -94,9 +94,13 @@ def partition_to_grid(point_geo, row_num, col_num):
 
 
 def convert_time(df):
+    """
+    old_time_format = '%Y-%m-%d %H:%M:%S'
+    new_time_format = '%Y-%m-%dT%H:%M:%SZ'
+    """
+
     df['time'] = df.apply(
-        lambda x: pd.to_datetime(
-            x['time_str'][:-6], format=old_time_format).strftime(new_time_format),
+        lambda x: x['time_str'].replace(' ', 'T') + 'Z',
         axis=1)
     df['timestamp'] = df.apply(
         lambda x: float(datetime.timestamp(
@@ -257,7 +261,7 @@ def gen_config_grid(row_num, column_num):
     return grid
 
 
-def gen_config_info(file_name):
+def gen_config_info(file_name, interval):
     info = \
         {
             "data_col": [
@@ -272,17 +276,18 @@ def gen_config_info(file_name):
             "init_weight_inf_or_zero": "inf",
             "set_weight_link_or_dist": "dist",
             "calculate_weight_adj": False,
-            "weight_adj_epsilon": 0.1
+            "weight_adj_epsilon": 0.1,
+            "time_intervals": interval
         }
     return info
 
 
-def gen_config(output_dir_flow, file_name, row_num, column_num):
+def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
     config = {}
     data = json.loads(json.dumps(config))
     data["geo"] = gen_config_geo()
     data["grid"] = gen_config_grid(row_num, column_num)
-    data["info"] = gen_config_info(file_name)
+    data["info"] = gen_config_info(file_name, interval)
     config = json.dumps(data)
     with open(output_dir_flow + "/config.json", "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
@@ -314,6 +319,8 @@ if __name__ == '__main__':
     end_str = '%d-%02d-%02d' % (end_year, end_month, end_day)
     dataset_austin = \
         dataset_austin.loc[dataset_austin['started_on'].apply(lambda x: end_str >= x.split(" ")[0] >= start_str)]
+    dataset_austin = \
+        dataset_austin.loc[dataset_austin['completed_on'].apply(lambda x: end_str >= x.split(" ")[0] >= start_str)]
     dataset_austin.reset_index(drop=True, inplace=True)
     print('finish read csv')
 
@@ -327,4 +334,4 @@ if __name__ == '__main__':
     )
     print('finish')
 
-    gen_config(output_dir_flow, file_name, row_num, column_num)
+    gen_config(output_dir_flow, file_name, row_num, column_num, interval)

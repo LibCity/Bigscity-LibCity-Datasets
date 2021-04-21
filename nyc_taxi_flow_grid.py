@@ -10,7 +10,7 @@ new_time_format = '%Y-%m-%dT%H:%M:%SZ'
 
 
 def get_data_url(input_dir_flow, start_year, start_month, end_year, end_month):
-    pattern = input_dir_flow + "/yellow_tripdata_%d-%02d.csv"
+    pattern = input_dir_flow + "/green_tripdata_%d-%02d.csv"
 
     data_url = []
 
@@ -33,17 +33,17 @@ def handle_point_geo(df):
     :param df:
     :return: df['geo_id', 'poi_lat', 'poi_lon']
     """
-    start = df[['pickup_latitude', 'pickup_longitude']]
+    start = df[['Pickup_latitude', 'Pickup_longitude']]
     start.columns = ['s_lat', 's_lon']
-    end = df[['dropoff_latitude', 'dropoff_longitude']]
+    end = df[['Dropoff_latitude', 'Dropoff_longitude']]
     end.columns = ['s_lat', 's_lon']
     station_data = pd.concat((start, end), axis=0)
     station_data = station_data.drop_duplicates()
     station_data.rename(columns={'s_lat': 'poi_lat', 's_lon': 'poi_lon'},
                         inplace=True)
 
-    station_data = station_data.loc[station_data['poi_lat'].apply(lambda x: x != 0)]
-    station_data = station_data.loc[station_data['poi_lon'].apply(lambda x: x != 0)]
+    station_data = station_data.loc[station_data['poi_lat'].apply(lambda x: x != 0 and x is not None and not math.isnan(x))]
+    station_data = station_data.loc[station_data['poi_lon'].apply(lambda x: x != 0 and x is not None and not math.isnan(x))]
     station_num = station_data.shape[0]
     station_data.loc[:, 'geo_id'] = range(0, station_num)
     station_data = station_data[['geo_id', 'poi_lat', 'poi_lon']]
@@ -113,9 +113,13 @@ def partition_to_grid(point_geo, row_num, col_num):
 
 
 def convert_time(df):
+    """
+    old_time_format = '%Y-%m-%d %H:%M:%S'
+    new_time_format = '%Y-%m-%dT%H:%M:%SZ'
+    """
+
     df['time'] = df.apply(
-        lambda x: pd.to_datetime(
-            x['time_str'], format=old_time_format).strftime(new_time_format),
+        lambda x: x['time_str'].replace(' ', 'T') + 'Z',
         axis=1)
     df['timestamp'] = df.apply(
         lambda x: float(datetime.timestamp(
@@ -131,9 +135,9 @@ def convert_to_trajectory(df):
     :param df: all data
     :return: df['driveid', 'poi_lon', 'poi_lat', 'time', 'timestamp']
     """
-    start = df[['drive_id', 'pickup_longitude', 'pickup_latitude', 'pickup_datetime']]
+    start = df[['drive_id', 'Pickup_longitude', 'Pickup_latitude', 'lpep_pickup_datetime']]
     start.columns = ['driveid', 'poi_lon', 'poi_lat', 'time_str']
-    end = df[['drive_id', 'dropoff_longitude', 'dropoff_latitude', 'dropoff_datetime']]
+    end = df[['drive_id', 'Dropoff_longitude', 'Dropoff_latitude', 'Lpep_dropoff_datetime']]
     end.columns = ['driveid', 'poi_lon', 'poi_lat', 'time_str']
     trajectory_data = pd.concat((start, end), axis=0)
     trajectory_data = convert_time(trajectory_data)
@@ -276,7 +280,7 @@ def gen_config_grid(row_num, column_num):
     return grid
 
 
-def gen_config_info(file_name):
+def gen_config_info(file_name, interval):
     info = \
         {
             "data_col": [
@@ -291,17 +295,18 @@ def gen_config_info(file_name):
             "init_weight_inf_or_zero": "inf",
             "set_weight_link_or_dist": "dist",
             "calculate_weight_adj": False,
-            "weight_adj_epsilon": 0.1
+            "weight_adj_epsilon": 0.1,
+            "time_intervals": interval
         }
     return info
 
 
-def gen_config(output_dir_flow, file_name, row_num, column_num):
+def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
     config = {}
     data = json.loads(json.dumps(config))
     data["geo"] = gen_config_geo()
     data["grid"] = gen_config_grid(row_num, column_num)
-    data["info"] = gen_config_info(file_name)
+    data["info"] = gen_config_info(file_name, interval)
     config = json.dumps(data)
     with open(output_dir_flow + "/config.json", "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
@@ -309,9 +314,9 @@ def gen_config(output_dir_flow, file_name, row_num, column_num):
 
 
 if __name__ == '__main__':
-    interval = 86400
-    (start_year, start_month) = (2013, 11)
-    (end_year, end_month) = (2013, 11)
+    interval = 3600
+    (start_year, start_month) = (2014, 1)
+    (end_year, end_month) = (2014, 1)
     row_num = 10
     column_num = 20
 
@@ -329,11 +334,17 @@ if __name__ == '__main__':
         os.makedirs(output_dir_flow)
 
     dataset_nyc = pd.concat(
-        map(lambda x: pd.read_csv(x), data_url), axis=0
+        map(lambda x: pd.read_csv(x, index_col=False), data_url), axis=0
     )
     dataset_nyc.reset_index(drop=True, inplace=True)
     data_num = dataset_nyc.shape[0]
     dataset_nyc["drive_id"] = list(range(data_num))
+    dataset_nyc = dataset_nyc.loc[dataset_nyc['lpep_pickup_datetime'].
+        apply(lambda x:
+              '%d-%02d-%02d' % (end_year, end_month, 30) >= x[:10] >= '%d-%02d-%02d' % (start_year, start_month, 1))]
+    dataset_nyc = dataset_nyc.loc[dataset_nyc['Lpep_dropoff_datetime'].
+        apply(lambda x:
+              '%d-%02d-%02d' % (end_year, end_month, 30) >= x[:10] >= '%d-%02d-%02d' % (start_year, start_month, 1))]
     print('finish read csv')
 
     nyc_taxi_flow(
@@ -346,4 +357,4 @@ if __name__ == '__main__':
     )
     print('finish')
 
-    gen_config(output_dir_flow, file_name, row_num, column_num)
+    gen_config(output_dir_flow, file_name, row_num, column_num, interval)

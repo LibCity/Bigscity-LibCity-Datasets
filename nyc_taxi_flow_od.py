@@ -75,13 +75,17 @@ def get_geo_data(area_geo):
 
 
 def convert_time(df):
+    """
+    old_time_format = '%Y-%m-%d %H:%M:%S'
+    new_time_format = '%Y-%m-%dT%H:%M:%SZ'
+    """
+
     df['time'] = df.apply(
-        lambda x: pd.to_datetime(
-            x['time_str'][:-6], format=old_time_format).strftime(new_time_format),
+        lambda x: x['time_str'].replace(' ', 'T') + 'Z',
         axis=1)
     df['timestamp'] = df.apply(
         lambda x: float(datetime.timestamp(
-            pd.to_datetime(x['time_str'][:-6],
+            pd.to_datetime(x['time_str'],
                            utc=True,
                            format=old_time_format))),
         axis=1)
@@ -106,6 +110,8 @@ def convert_to_trajectory(df):
 def add_previous_poi(tra_by_taxi):
     tra_by_taxi = tra_by_taxi.sort_values(by='time')
     tra_by_taxi['prev_geo_id'] = tra_by_taxi['geo_id'].shift(1)
+    tra_by_taxi['prev_time'] = tra_by_taxi['time'].shift(1)
+    tra_by_taxi['prev_timestamp'] = tra_by_taxi['timestamp'].shift(1)
     return tra_by_taxi[1:]
 
 
@@ -114,48 +120,31 @@ def judge_time_id(df, time_dividing_point):
         lambda x: judge_id(x['timestamp'], time_dividing_point),
         axis=1
     )
+    df['prev_time_id'] = df.apply(
+        lambda x: judge_id(x['prev_timestamp'], time_dividing_point),
+        axis=1
+    )
     return df
-
-
-def gen_flow_data(trajectory, time_dividing_point):
-    """
-    :param trajectory:
-    :param time_dividing_point:
-    :return: ['time', 'geo_id', 'inflow', 'outflow']
-    """
-    trajectory = trajectory.loc[trajectory['geo_id'] != trajectory['prev_geo_id']]
-    tra_groups = trajectory.groupby(by='time_id')
-
-    for tra_group, t in zip(tra_groups, time_dividing_point):
-        tra_group = tra_group[1]
-        flow_in = tra_group.groupby(by=['geo_id'])[['geo_id']].count().sort_index()
-        flow_in.columns = ['inflow']
-        flow_out = tra_group.groupby(by=['prev_geo_id'])[['prev_geo_id']].count().sort_index()
-        flow_out.index.names = ['geo_id']
-        flow_out.columns = ['outflow']
-        flow = flow_in.join(flow_out, how='outer', on=['geo_id'])
-        flow = flow.reset_index()
-        flow['time'] = timestamp2str(t)
-        yield flow
 
 
 def timestamp2str(timestamp):
     return pd.to_datetime(timestamp, unit='s').strftime(new_time_format)
 
 
-def fill_empty_flow(flow_data, time_dividing_point, a_ids):
-    a_ids = list(a_ids)
-    time_ids = list(map(timestamp2str, time_dividing_point))
+def gen_empty_od_data(area, time_dividing_point):
+    od_id = 0
+    od_data = pd.DataFrame(columns=['od_id', 'type', 'time',
+                                    'origin_id', 'destination_id', 'flow'])
+    a_ids = area['a_id']
+    for ori_id in a_ids:
+        for des_id in a_ids:
+            for t in time_dividing_point:
+                od_data.loc[od_id] = [od_id, 'state', timestamp2str(t), ori_id, des_id, 0]
+                od_id += 1
+    return od_data
 
-    ids = [(x, y) for x in a_ids for y in time_ids]
-    flow_keep = pd.DataFrame(ids, columns=['geo_id', 'time'])
-    flow_keep = pd.merge(flow_keep, flow_data, how='outer')
 
-    flow_keep = flow_keep.fillna(value={'inflow': 0, 'outflow': 0})
-    return flow_keep
-
-
-def calculate_flow(trajectory_data, area, interval):
+def calculate_od(trajectory_data, area, interval):
     taxi_trajectory = trajectory_data.groupby(by='driveid')
     taxi_trajectory = pd.concat(
         map(lambda x: add_previous_poi(x[1]), taxi_trajectory))
@@ -172,21 +161,20 @@ def calculate_flow(trajectory_data, area, interval):
     time_dividing_point = \
         list(np.arange(min_timestamp, max_timestamp, interval))
     taxi_trajectory = judge_time_id(taxi_trajectory, time_dividing_point)
+    taxi_trajectory = \
+        taxi_trajectory.loc[taxi_trajectory['time_id'] == taxi_trajectory['prev_time_id']]
 
-    flow_data_part = gen_flow_data(taxi_trajectory, time_dividing_point)
-    flow_data = pd.concat(flow_data_part)
-    a_ids = area["a_id"]
-    flow_data = fill_empty_flow(flow_data, time_dividing_point, a_ids)
-    flow_data['type'] = 'state'
-    flow_data = flow_data.reset_index(drop=True)
-    flow_data['dyna_id'] = flow_data.index
-    flow_data = flow_data[
-        ['dyna_id', 'type', 'time', 'geo_id', 'inflow', 'outflow']
-    ]
-    flow_data.columns = [
-        'dyna_id', 'type', 'time', 'entity_id', 'inflow', 'outflow'
-    ]
-    return flow_data
+    od_data = gen_empty_od_data(area, time_dividing_point)
+    for index, row in taxi_trajectory.iterrows():
+        time_id = judge_id(row['timestamp'], time_dividing_point)
+        time_str = timestamp2str(time_dividing_point[time_id])
+        prev_geo_id = row['prev_geo_id']
+        geo_id = row['geo_id']
+        od_data['flow'] = list(map(lambda time, origin_id, destination_id, flow:
+                                   flow + 1 if time == time_str and origin_id == prev_geo_id and destination_id == geo_id
+                                   else flow, od_data.time, od_data.origin_id, od_data.destination_id, od_data.flow))
+
+    return od_data
 
 
 def nyc_taxi_flow(
@@ -195,18 +183,16 @@ def nyc_taxi_flow(
 
     # geo data
     area = handle_area_geo(data_set)
-    geo_data = get_geo_data(area)
-    geo_data.to_csv(data_name + '.geo', index=False)
     print('finish geo')
 
     # trajectory data
     trajectory_data = convert_to_trajectory(data_set)
     print('finish trajectory')
 
-    # flow data
-    flow_data = calculate_flow(trajectory_data, area, interval=interval)
-    flow_data.to_csv(data_name + '.grid', index=False)
-    print('finish flow')
+    # od data
+    od_data = calculate_od(trajectory_data, area, interval=interval)
+    od_data.to_csv(data_name + '.od', index=False)
+    print('finish od')
 
 
 def gen_config_geo():
@@ -234,7 +220,21 @@ def gen_config_dyna():
     return dyna
 
 
-def gen_config_info(file_name):
+def gen_config_od():
+    od = {
+        "including_types": [
+            "state"
+        ],
+        "state": {
+            "origin_id": "geo_id",
+            "destination_id": "geo_id",
+            "flow": "num"
+        }
+    }
+    return od
+
+
+def gen_config_info(file_name, interval):
     info = \
         {
             "data_col": [
@@ -249,17 +249,19 @@ def gen_config_info(file_name):
             "init_weight_inf_or_zero": "inf",
             "set_weight_link_or_dist": "dist",
             "calculate_weight_adj": False,
-            "weight_adj_epsilon": 0.1
+            "weight_adj_epsilon": 0.1,
+            "time_intervals": interval
         }
     return info
 
 
-def gen_config(output_dir_flow, file_name):
+def gen_config(output_dir_flow, file_name, interval):
     config = {}
     data = json.loads(json.dumps(config))
     data["geo"] = gen_config_geo()
     data["dyna"] = gen_config_dyna()
-    data["info"] = gen_config_info(file_name)
+    data['od'] = gen_config_od()
+    data["info"] = gen_config_info(file_name, interval)
     config = json.dumps(data)
     with open(output_dir_flow + "/config.json", "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
@@ -267,9 +269,9 @@ def gen_config(output_dir_flow, file_name):
 
 
 if __name__ == '__main__':
-    interval = 86400
-    (start_year, start_month) = (2016, 12)
-    (end_year, end_month) = (2016, 12)
+    interval = 3600
+    (start_year, start_month) = (2020, 6)
+    (end_year, end_month) = (2020, 6)
 
     file_name = 'NYCTAXI%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
     output_dir_flow = 'output/NYCTAXI%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
@@ -290,6 +292,12 @@ if __name__ == '__main__':
     dataset_nyc.reset_index(drop=True, inplace=True)
     data_num = dataset_nyc.shape[0]
     dataset_nyc["drive_id"] = list(range(data_num))
+    dataset_nyc = dataset_nyc.loc[dataset_nyc['tpep_pickup_datetime'].
+        apply(lambda x:
+              '%d-%02d-%02d' % (end_year, end_month, 30) >= x[:10] >= '%d-%02d-%02d' % (start_year, start_month, 1))]
+    dataset_nyc = dataset_nyc.loc[dataset_nyc['tpep_dropoff_datetime'].
+        apply(lambda x:
+              '%d-%02d-%02d' % (end_year, end_month, 30) >= x[:10] >= '%d-%02d-%02d' % (start_year, start_month, 1))]
     print('finish read csv')
 
     nyc_taxi_flow(
@@ -300,4 +308,4 @@ if __name__ == '__main__':
     )
     print('finish')
 
-    gen_config(output_dir_flow, file_name)
+    gen_config(output_dir_flow, file_name, interval)

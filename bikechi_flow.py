@@ -34,8 +34,10 @@ def handle_point_geo(df):
     try:
         start = df[['start_station_id', 'start_station_name',
                     'start_lat', 'start_lng']]
+        start.columns = ['s_id', 's_name', 's_lat', 's_lon']
         end = df[['end_station_id', 'end_station_name',
                   'end_lat', 'end_lng']]
+        end.columns = ['s_id', 's_name', 's_lat', 's_lon']
     except:
         start = df[['from_station_id', 'from_station_name']]
         start.columns = ['s_id', 's_name']
@@ -47,8 +49,8 @@ def handle_point_geo(df):
         end['s_lon'] = end['s_id'].apply(select_lon)
     station_data = pd.concat((start, end), axis=0)
     station_data = station_data.loc[station_data['s_id'].apply(lambda x: not math.isnan(x))]
-    station_data = station_data.loc[station_data['s_lat'].apply(lambda x: x is not None)]
-    station_data = station_data.loc[station_data['s_lon'].apply(lambda x: x is not None)]
+    station_data = station_data.loc[station_data['s_lat'].apply(lambda x: x != 0 and x is not None and not math.isnan(x))]
+    station_data = station_data.loc[station_data['s_lon'].apply(lambda x: x != 0 and x is not None and not math.isnan(x))]
     station_data = station_data.drop_duplicates()
     station_data.rename(columns={'s_name': 'poi_name',
                                  's_lat': 'poi_lat', 's_lon': 'poi_lon'},
@@ -329,7 +331,7 @@ def gen_config_grid(row_num, column_num):
     return grid
 
 
-def gen_config_info(file_name):
+def gen_config_info(file_name, interval):
     info = \
         {
             "data_col": [
@@ -344,17 +346,18 @@ def gen_config_info(file_name):
             "init_weight_inf_or_zero": "inf",
             "set_weight_link_or_dist": "dist",
             "calculate_weight_adj": False,
-            "weight_adj_epsilon": 0.1
+            "weight_adj_epsilon": 0.1,
+            "time_intervals": interval
         }
     return info
 
 
-def gen_config(output_dir_flow, file_name, row_num, column_num):
+def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
     config = {}
     data = json.loads(json.dumps(config))
     data["geo"] = gen_config_geo()
     data["grid"] = gen_config_grid(row_num, column_num)
-    data["info"] = gen_config_info(file_name)
+    data["info"] = gen_config_info(file_name, interval)
     config = json.dumps(data)
     with open(output_dir_flow + "/config.json", "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
@@ -377,7 +380,7 @@ def generate_lon_lat_info(input_json_url):
 
 if __name__ == '__main__':
     interval = 86400
-    output_str = 'BIKECHI2019Q4'
+    output_str = 'BIKECHI202010-202010'
     row_num = 15
     column_num = 18
 
@@ -388,8 +391,8 @@ if __name__ == '__main__':
     lon_lat_info = generate_lon_lat_info(input_json_url)
     # The data files in data_url must have the same format.
     data_url = [
-        #input_dir_flow + '/202010-divvy-tripdata/202010-divvy-tripdata.csv'
-        input_dir_flow + '/Divvy_Trips_2019_Q4/Divvy_Trips_2019_Q4.csv'
+        input_dir_flow + '/202010-divvy-tripdata/202010-divvy-tripdata.csv'
+        #input_dir_flow + '/Divvy_Trips_2019_Q4/Divvy_Trips_2019_Q4.csv'
     ]
     data_url = tuple(data_url)
     if not os.path.exists(output_dir_flow):
@@ -411,4 +414,4 @@ if __name__ == '__main__':
     )
     print('finish')
 
-    gen_config(output_dir_flow, file_name, row_num, column_num)
+    gen_config(output_dir_flow, file_name, row_num, column_num, interval)
