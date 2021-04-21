@@ -10,6 +10,122 @@ old_time_format = '%Y-%m-%d %H:%M:%S'
 new_time_format = '%Y-%m-%dT%H:%M:%SZ'
 
 
+def get_data_url_year(
+        input_dir_flow, start_year, start_month, end_year, end_month):
+    res = []
+    pattern_year = input_dir_flow + "/%d-capitalbikeshare-tripdata.csv"
+    i = start_year
+    while i <= end_year:
+        res.append(pattern_year % i)
+        i += 1
+    return res
+
+
+def get_data_url_Q(
+        input_dir_flow, start_year, start_month, end_year, end_month):
+    res = []
+    pattern_Q = input_dir_flow + "/%dQ%d-capitalbikeshare-tripdata.csv"
+
+    start_Q = (start_month - 1) // 3 + 1
+    end_Q = (end_month - 1) // 3 + 1
+    year = start_year
+    while year <= end_year:
+        if year == start_year:
+            Q = start_Q
+        else:
+            Q = 1
+        if year == end_year:
+            end = end_Q
+        else:
+            end = 4
+        while Q <= end:
+            res.append(pattern_Q % (year, Q))
+            Q += 1
+        year += 1
+    return res
+
+
+def get_data_url_month(
+        input_dir_flow, start_year, start_month, end_year, end_month):
+    res = []
+    pattern_month = input_dir_flow + "/%d%02d-capitalbikeshare-tripdata.csv"
+    pattern_201801 = input_dir_flow + "/%d%02d_capitalbikeshare_tripdata.csv"
+    year = start_year
+    while year <= end_year:
+        if year == start_year:
+            month = start_month
+        else:
+            month = 1
+        if year == end_year:
+            end = end_month
+        else:
+            end = 12
+        while month <= end:
+            if year == 2018 and month == 1:
+                res.append(pattern_201801 % (year, month))
+            else:
+                res.append(pattern_month % (year, month))
+            month += 1
+        year += 1
+    return res
+
+
+def get_data_url(
+        input_dir_flow, start_year, start_month, end_year, end_month):
+    res = []
+    start_str = '%d-%02d' % (start_year, start_month)
+    end_str = '%d-%02d' % (end_year, end_month)
+    if start_str <= '2011-12':
+        if end_str <= '2011-12':
+            res += get_data_url_year(
+                input_dir_flow,
+                start_year,
+                start_month,
+                end_year,
+                end_month
+            )
+            return res
+        else:
+            res += get_data_url_year(
+                input_dir_flow,
+                start_year,
+                start_month,
+                2011,
+                12
+            )
+            start_year, start_month = 2021, 1
+            start_str = '%d-%02d' % (start_year, start_month)
+
+    if start_str <= '2017-12':
+        if end_str <= '2017-12':
+            res += get_data_url_Q(
+                input_dir_flow,
+                start_year,
+                start_month,
+                end_year,
+                end_month
+            )
+            return res
+        else:
+            res += get_data_url_Q(
+                input_dir_flow,
+                start_year,
+                start_month,
+                2017,
+                12
+            )
+            start_year, start_month = 2018, 1
+
+    res += get_data_url_month(
+        input_dir_flow,
+        start_year,
+        start_month,
+        end_year,
+        end_month
+    )
+    return res
+
+
 def gen_station_csv():
     json_file_path = 'station_information/station_information.json'
     csv_file_path = 'station_information/station_information.csv'
@@ -106,6 +222,7 @@ def add_station_loc(data_set):
                      ]]
 
 
+'''
 def get_data_url(input_dir_flow, start_year, start_month, end_year, end_month):
     pattern = input_dir_flow + "/%d%02d-citibike-tripdata.csv"
     # pattern_JC = input_dir_flow + "/JC-%d%02d-citibike-tripdata.csv"
@@ -125,6 +242,7 @@ def get_data_url(input_dir_flow, start_year, start_month, end_year, end_month):
         i += 1
 
     return data_url
+'''
 
 
 def handle_point_geo(df):
@@ -231,8 +349,7 @@ def partition_to_grid(point_geo, row_num, col_num):
 
 def convert_time(df):
     df['time'] = df.apply(
-        lambda x: pd.to_datetime(
-            x['time_str'], format=old_time_format).strftime(new_time_format),
+        lambda x: x['time_str'].replace(' ', 'T') + 'Z',
         axis=1)
     df['timestamp'] = df.apply(
         lambda x: float(datetime.timestamp(
@@ -535,8 +652,8 @@ def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
 if __name__ == '__main__':
 
     # 参数
-    # 时间间隔
-    interval = 3600
+    # 时间间隔 s
+    interval = 1800
     # 开始年月日
     (start_year, start_month, start_day) = (2021, 3, 1)
     # 结束年月日
@@ -548,10 +665,13 @@ if __name__ == '__main__':
     # 输入文件夹名称
     input_dir_flow = 'input/Bike-DC'
     # 待处理的数据文件名
-    data_url = (
-        # input_dir_flow + '/2010-capitalbikeshare-tripdata.csv',
-        input_dir_flow + '/202103-capitalbikeshare-tripdata.csv',
-    )
+    data_url = get_data_url(input_dir_flow=input_dir_flow,
+                            start_year=start_year,
+                            start_month=start_month,
+                            end_year=end_year,
+                            end_month=end_month
+                            )
+
     # 输出文件名称 与 输出文件夹名称
     if start_year == end_year and start_month == end_month:
         file_name = 'BIKE-DC%d%02d' \
@@ -590,8 +710,12 @@ if __name__ == '__main__':
     start_str = '%d-%02d-%02d' % (start_year, start_month, start_day)
     end_str = '%d-%02d-%02d' % (end_year, end_month, end_day)
 
-    data_set_dc = data_set_dc.loc[data_set_dc['starttime'].apply(lambda x: end_str >= x.split(" ")[0] >= start_str)]
-    data_set_dc = data_set_dc.loc[data_set_dc['stoptime'].apply(lambda x: end_str >= x.split(" ")[0] >= start_str)]
+    data_set_dc = data_set_dc.loc[
+        data_set_dc['starttime'].apply(
+            lambda x: end_str >= x.split(" ")[0] >= start_str)]
+    data_set_dc = data_set_dc.loc[
+        data_set_dc['stoptime'].apply(
+            lambda x: end_str >= x.split(" ")[0] >= start_str)]
 
     # 调用处理函数，生成.grid 和.geo文件
     dc_bike_flow(
