@@ -134,8 +134,7 @@ def partition_to_grid(point_geo, row_num, col_num):
 
 def convert_time(df):
     df['time'] = df.apply(
-        lambda x: pd.to_datetime(
-            x['time_str'], format=old_time_format).strftime(new_time_format),
+        lambda x: x['time_str'].replace(' ', 'T') + 'Z',
         axis=1)
     df['timestamp'] = df.apply(
         lambda x: float(datetime.timestamp(
@@ -399,7 +398,7 @@ def gen_config_grid(row_num, column_num):
     return grid
 
 
-def gen_config_info(file_name,interval):
+def gen_config_info(file_name, interval):
     info = \
         {
             "data_col": [
@@ -420,12 +419,12 @@ def gen_config_info(file_name,interval):
     return info
 
 
-def gen_config(output_dir_flow, file_name, row_num, column_num,interval):
+def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
     config = {}
     data = json.loads(json.dumps(config))
     data["geo"] = gen_config_geo()
     data["grid"] = gen_config_grid(row_num, column_num)
-    data["info"] = gen_config_info(file_name,interval)
+    data["info"] = gen_config_info(file_name, interval)
     config = json.dumps(data)
     with open(output_dir_flow + "/config.json", "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
@@ -436,7 +435,7 @@ if __name__ == '__main__':
 
     # 参数
     # 时间间隔
-    interval = 3600
+    interval = 1800
     # 开始年月
     (start_year, start_month, start_day) = (2021, 2, 1)
     # 结束年月
@@ -445,12 +444,17 @@ if __name__ == '__main__':
     row_num = 16
     # 列数
     column_num = 8
-    # 输出文件名称
-    file_name = 'NYCBIKE%d%02d-%d%02d' \
-                % (start_year, start_month, end_year, end_month)
-    # 输出文件夹名称
-    output_dir_flow = 'output/NYCBIKE%d%02d-%d%02d' \
-                      % (start_year, start_month, end_year, end_month)
+    # 输出文件名称 输出文件夹名称
+    if start_year == end_year and start_month == end_month:
+        file_name = 'NYCBIKE%d%02d' \
+                    % (start_year, start_month)
+        output_dir_flow = 'output/NYCBIKE%d%02d' \
+                          % (start_year, start_month)
+    else:
+        file_name = 'NYCBIKE%d%02d-%d%02d' \
+                    % (start_year, start_month, end_year, end_month)
+        output_dir_flow = 'output/NYCBIKE%d%02d-%d%02d' \
+                          % (start_year, start_month, end_year, end_month)
     # 输入文件夹名称
     input_dir_flow = 'input/NYC-Bike'
     # 生成待处理的数据文件名
@@ -477,8 +481,12 @@ if __name__ == '__main__':
     start_str = '%d-%02d-%02d' % (start_year, start_month, start_day)
     end_str = '%d-%02d-%02d' % (end_year, end_month, end_day)
 
-    dataset_nyc = dataset_nyc.loc[dataset_nyc['starttime'].apply(lambda x: end_str >= x.split(" ")[0] >= start_str)]
-    dataset_nyc = dataset_nyc.loc[dataset_nyc['stoptime'].apply(lambda x: end_str >= x.split(" ")[0] >= start_str)]
+    dataset_nyc = dataset_nyc.loc[
+        dataset_nyc['starttime'].apply(
+            lambda x: end_str >= x.split(" ")[0] >= start_str)]
+    dataset_nyc = dataset_nyc.loc[
+        dataset_nyc['stoptime'].apply(
+            lambda x: end_str >= x.split(" ")[0] >= start_str)]
     # 调用处理函数，生成.grid 和.geo文件
     nyc_bike_flow(
         output_dir_flow,
