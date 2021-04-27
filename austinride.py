@@ -2,7 +2,7 @@ import json
 import math
 import os
 from datetime import datetime
-
+import time
 import pandas as pd
 
 old_time_format = '%Y-%m-%d %H:%M:%S'
@@ -295,9 +295,10 @@ def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     interval = 3600
-    (start_year, start_month, start_day) = (2017, 1, 1)
-    (end_year, end_month, end_day) = (2017, 1, 31)
+    (start_year, start_month, start_day) = (2016, 7, 1)
+    (end_year, end_month, end_day) = (2016, 9, 30)
     row_num = 16
     column_num = 8
 
@@ -335,3 +336,5 @@ if __name__ == '__main__':
     print('finish')
 
     gen_config(output_dir_flow, file_name, row_num, column_num, interval)
+    end_time = time.time()
+    print(end_time - start_time)

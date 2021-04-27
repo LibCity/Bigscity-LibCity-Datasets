@@ -4,7 +4,7 @@ import json
 import os
 import math
 from datetime import datetime
-
+import time
 old_time_format = '%Y-%m-%d %H:%M:%S.%f'
 new_time_format = '%Y-%m-%dT%H:%M:%SZ'
 
@@ -432,29 +432,23 @@ def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
 
 
 if __name__ == '__main__':
-
+    start_time = time.time()
     # 参数
     # 时间间隔
-    interval = 1800
+    interval = 3600
     # 开始年月
-    (start_year, start_month, start_day) = (2021, 2, 1)
+    (start_year, start_month, start_day) = (2020, 7, 1)
     # 结束年月
-    (end_year, end_month, end_day) = (2021, 2, 28)
+    (end_year, end_month, end_day) = (2020, 9, 30)
     # 行数
-    row_num = 16
+    row_num = 10
     # 列数
-    column_num = 8
+    column_num = 20
     # 输出文件名称 输出文件夹名称
-    if start_year == end_year and start_month == end_month:
-        file_name = 'NYCBIKE%d%02d' \
-                    % (start_year, start_month)
-        output_dir_flow = 'output/NYCBIKE%d%02d' \
-                          % (start_year, start_month)
-    else:
-        file_name = 'NYCBIKE%d%02d-%d%02d' \
-                    % (start_year, start_month, end_year, end_month)
-        output_dir_flow = 'output/NYCBIKE%d%02d-%d%02d' \
-                          % (start_year, start_month, end_year, end_month)
+    file_name = 'NYCBIKE%d%02d-%d%02d' \
+                % (start_year, start_month, end_year, end_month)
+    output_dir_flow = 'output/NYCBIKE%d%02d-%d%02d' \
+                      % (start_year, start_month, end_year, end_month)
     # 输入文件夹名称
     input_dir_flow = 'input/NYC-Bike'
     # 生成待处理的数据文件名
@@ -465,7 +459,7 @@ if __name__ == '__main__':
                             end_month=end_month
                             )
     data_url = tuple(data_url)
-    # print(data_url)
+    print(data_url)
     # 创建输出文件夹
     if not os.path.exists(output_dir_flow):
         os.makedirs(output_dir_flow)
@@ -500,3 +494,5 @@ if __name__ == '__main__':
 
     # 生成config.json文件
     gen_config(output_dir_flow, file_name, row_num, column_num, interval)
+    end_time = time.time()
+    print(end_time - start_time)

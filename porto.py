@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from datetime import datetime
 import numpy as np
+import time
 
 old_time_format = '%Y-%m-%d %H:%M:%S'
 new_time_format = '%Y-%m-%dT%H:%M:%SZ'
@@ -365,17 +366,21 @@ def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     # 参数
     # 时间间隔
     interval = 3600
-
     # 行数
     row_num = 20
     # 列数
     column_num = 10
+    # 开始年月
+    (start_year, start_month, start_day) = (2013, 7, 1)
+    # 结束年月
+    (end_year, end_month, end_day) = (2013, 9, 30)
     # 输入文件名称
     # input_file_name = 'Porto_1000.csv'
-    input_file_name = 'Porto.csv'
+    input_file_name = 'train.csv'
     # 输出文件名称
     file_name = input_file_name.split('.')[0]
     # 输出文件夹名称
@@ -393,6 +398,15 @@ if __name__ == '__main__':
     data_set_Porto = pd.read_csv(data_url, usecols=[4, 5, 8])
     data_set_Porto.reset_index(drop=True, inplace=True)
     data_set_Porto.columns = ['taxi_id', 'timestamp', 'polyline']
+    print(data_set_Porto.shape)
+
+    dt1 = '%d-%02d-%02dT00:00:00Z' % (start_year, start_month, start_day)
+    dt2 = '%d-%02d-%02dT23:59:59Z' % (end_year, end_month, end_day)
+    stimes = time.mktime(time.strptime(dt1, '%Y-%m-%dT%H:%M:%SZ'))
+    etimes = time.mktime(time.strptime(dt2, '%Y-%m-%dT%H:%M:%SZ'))
+    data_set_Porto = data_set_Porto[(data_set_Porto['timestamp'] <= etimes)
+                                    & (data_set_Porto['timestamp'] >= stimes)]
+    print(data_set_Porto.shape)
     print('finish read csv')
 
     # 对输入文件进行预处理，分割出polyline的数据
@@ -411,3 +425,5 @@ if __name__ == '__main__':
     # 生成config.json文件
     gen_config(output_dir_flow, file_name, row_num, column_num, interval)
     print('finish')
+    end_time = time.time()
+    print(end_time - start_time)

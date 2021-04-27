@@ -3,6 +3,7 @@ import pandas as pd
 import os
 from datetime import datetime
 import numpy as np
+import time
 
 # total number of points:15 million
 # the total distance of the trajectories: 9 million km
@@ -330,12 +331,13 @@ def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     # 参数
     # 测试时选取的taxi数量
     test_taxi_num = TAXI_NUM
     # test_taxi_num = 500
     # 时间间隔
-    interval = 1800
+    interval = 3600
     # 开始年月
     (start_year, start_month, start_day) = (2008, 2, 2)
     # 结束年月
@@ -354,7 +356,7 @@ if __name__ == '__main__':
     data_url = [
         input_dir_flow + '/' + str(i + 1) + '.txt'
         for i in range(test_taxi_num)]
-    # print(data_url)
+    print(data_url)
 
     # 创建输出文件夹
     if not os.path.exists(output_dir_flow):
@@ -393,3 +395,5 @@ if __name__ == '__main__':
     # 生成config.json文件
     gen_config(output_dir_flow, file_name, row_num, column_num, interval)
     print('finish config')
+    end_time = time.time()
+    print(end_time - start_time)

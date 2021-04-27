@@ -2,7 +2,7 @@ import json
 import math
 import os
 from datetime import datetime
-
+import time
 import numpy as np
 import pandas as pd
 
@@ -379,25 +379,40 @@ def generate_lon_lat_info(input_json_url):
 
 
 if __name__ == '__main__':
-    interval = 86400
-    output_str = 'BIKECHI202010-202010'
+    start_time = time.time()
+    # 参数
+    # 时间间隔 s
+    interval = 3600
+    # 开始年月日
+    (start_year, start_month, start_day) = (2020, 7, 1)
+    # 结束年月日
+    (end_year, end_month, end_day) = (2020, 9, 30)
+    # 行数
     row_num = 15
+    # 列数
     column_num = 18
-
-    file_name = output_str
-    output_dir_flow = 'output/' + output_str
+    # 输入文件夹名称
     input_dir_flow = 'input/BIKECHI'
-    input_json_url = input_dir_flow + '/station_information.json'
-    lon_lat_info = generate_lon_lat_info(input_json_url)
-    # The data files in data_url must have the same format.
-    data_url = [
-        input_dir_flow + '/202010-divvy-tripdata/202010-divvy-tripdata.csv'
-        #input_dir_flow + '/Divvy_Trips_2019_Q4/Divvy_Trips_2019_Q4.csv'
-    ]
-    data_url = tuple(data_url)
+    # 输出文件名称 与 输出文件夹名称
+    file_name = 'BIKECHI%d%02d-%d%02d' \
+                % (start_year, start_month, end_year, end_month)
+    output_dir_flow = 'output/BIKECHI%d%02d-%d%02d' \
+                      % (start_year, start_month, end_year, end_month)
+    # 创建输出文件夹
     if not os.path.exists(output_dir_flow):
         os.makedirs(output_dir_flow)
 
+    # 地理位置信息
+    input_json_url = input_dir_flow + '/station_information.json'
+    lon_lat_info = generate_lon_lat_info(input_json_url)
+    # The data files in data_url must have the same format.
+    # 待处理的数据文件名
+    data_url = [
+        input_dir_flow + '/202007-divvy-tripdata.csv',
+        input_dir_flow + '/202008-divvy-tripdata.csv',
+        input_dir_flow + '/202009-divvy-tripdata.csv'
+    ]
+    data_url = tuple(data_url)
     dataset_chi = pd.concat(
         map(lambda x: pd.read_csv(x), data_url), axis=0
     )
@@ -412,6 +427,7 @@ if __name__ == '__main__':
         column_num,
         interval=interval
     )
-    print('finish')
-
     gen_config(output_dir_flow, file_name, row_num, column_num, interval)
+    print('finish')
+    end_time = time.time()
+    print(end_time - start_time)

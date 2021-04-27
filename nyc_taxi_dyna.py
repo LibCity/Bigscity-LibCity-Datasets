@@ -2,7 +2,7 @@ import json
 import math
 import os
 from datetime import datetime
-
+import time
 import numpy as np
 import pandas as pd
 
@@ -273,12 +273,15 @@ def gen_config(output_dir_flow, file_name, interval):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     interval = 3600
-    (start_year, start_month) = (2020, 6)
-    (end_year, end_month) = (2020, 6)
+    # 开始年月
+    (start_year, start_month, start_day) = (2020, 4, 1)
+    # 结束年月
+    (end_year, end_month, end_day) = (2020, 6, 30)
 
     file_name = 'NYCTAXI%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
-    output_dir_flow = 'output/NYCTAXI%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    output_dir_flow = 'output/NYCTAXI%d%02d-%d%02d_dyna' % (start_year, start_month, end_year, end_month)
     input_dir_flow = 'input/NYC-Taxi'
     data_url = get_data_url(input_dir_flow=input_dir_flow,
                             start_year=start_year,
@@ -287,6 +290,7 @@ if __name__ == '__main__':
                             end_month=end_month
                             )
     data_url = tuple(data_url)
+    print(data_url)
     if not os.path.exists(output_dir_flow):
         os.makedirs(output_dir_flow)
 
@@ -298,10 +302,12 @@ if __name__ == '__main__':
     dataset_nyc["drive_id"] = list(range(data_num))
     dataset_nyc = dataset_nyc.loc[dataset_nyc['tpep_pickup_datetime'].
         apply(lambda x:
-            '%d-%02d-%02d' % (end_year, end_month, 30) >= x[:10] >= '%d-%02d-%02d' % (start_year, start_month, 1))]
+            '%d-%02d-%02d' % (end_year, end_month, end_day) >= x[:10] >=
+            '%d-%02d-%02d' % (start_year, start_month, start_day))]
     dataset_nyc = dataset_nyc.loc[dataset_nyc['tpep_dropoff_datetime'].
         apply(lambda x:
-            '%d-%02d-%02d' % (end_year, end_month, 30) >= x[:10] >= '%d-%02d-%02d' % (start_year, start_month, 1))]
+            '%d-%02d-%02d' % (end_year, end_month, end_day) >= x[:10] >=
+            '%d-%02d-%02d' % (start_year, start_month, start_day))]
     print('finish read csv')
 
     nyc_taxi_flow(
@@ -313,3 +319,5 @@ if __name__ == '__main__':
     print('finish')
 
     gen_config(output_dir_flow, file_name, interval)
+    end_time = time.time()
+    print(end_time - start_time)
