@@ -233,7 +233,8 @@ if __name__ == '__main__':
                 # out += 1
                 grid_data[time_index][lon_index][lat_index][1] = grid_data[time_index][lon_index][lat_index][1] + 1
                 # in += 1
-                grid_data[time_index_new][lon_index_new][lat_index_new][0] = grid_data[time_index_new][lon_index_new][lat_index_new][0] +1
+                grid_data[time_index_new][lon_index_new][lat_index_new][0] =\
+                    grid_data[time_index_new][lon_index_new][lat_index_new][0] + 1
                 time_index = time_index_new
                 lon_index = lon_index_new
                 lat_index = lat_index_new
@@ -252,7 +253,8 @@ if __name__ == '__main__':
                 times = convert[time_index]
                 grid_file.write(str(dyna_id) + ',' + 'state' + ',' + str(times)
                                 + ',' + str(lat_index) + ',' + str(lon_index)
-                                + ',' + str(grid_data[time_index][lon_index][lat_index][0]) + ',' + str(grid_data[time_index][lon_index][lat_index][1]) + '\n')
+                                + ',' + str(grid_data[time_index][lon_index][lat_index][0]) +
+                                ',' + str(grid_data[time_index][lon_index][lat_index][1]) + '\n')
                 dyna_id = dyna_id + 1
                 if dyna_id % 10000 == 0:
                     print(str(dyna_id) + '//' + str(grid_data.shape[0] * grid_data.shape[1] * grid_data.shape[2]))
