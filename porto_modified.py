@@ -106,7 +106,7 @@ if __name__ == '__main__':
     # 开始年月日
     (start_year, start_month, start_day) = (2013, 7, 1)
     # 结束年月日
-    (end_year, end_month, end_day) = (2013, 7, 31)
+    (end_year, end_month, end_day) = (2013, 9, 30)
     # 输入文件名称
     input_file_name = 'Porto.csv'
     # input_file_name = 'train.csv'
@@ -224,6 +224,8 @@ if __name__ == '__main__':
         # 对于一辆taxi的轨迹数据
         for lon, lat in trajectory_list[1:]:
             timestamp += 15 * 1000  # 15s
+            if timestamp > etimes:
+                break
             time_index_new = judge_id(timestamp, time_dividing_point)
             lon_index_new = judge_id(lon, lon_dividing_points)
             lat_index_new = judge_id(lat, lat_dividing_points)
