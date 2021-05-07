@@ -248,7 +248,7 @@ def gen_config_info(file_name, interval):
             "output_dim": 2,
             "init_weight_inf_or_zero": "inf",
             "set_weight_link_or_dist": "dist",
-            "calculate_weight_adj": False,
+            "calculate_weight_adj": True,
             "weight_adj_epsilon": 0.1,
             "time_intervals": interval
         }

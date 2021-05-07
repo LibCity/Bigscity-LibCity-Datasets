@@ -6,6 +6,22 @@ import numpy as np
 import pandas as pd
 
 
+def rad(d):
+    return d * math.pi / 180.0
+
+
+def dis(lng1, lat1, lng2, lat2):  # 经度1 纬度1 经度2 纬度2
+    EARTH_RADIUS = 6378.137
+    radLat1 = rad(lat1)
+    radLat2 = rad(lat2)
+    a = radLat1 - radLat2
+    b = rad(lng1) - rad(lng2)
+    s = 2 * math.asin(math.sqrt(math.pow(math.sin(a / 2), 2) +
+                    math.cos(radLat1) * math.cos(radLat2) * math.pow(math.sin(b / 2), 2)))
+    s = s * EARTH_RADIUS
+    return round(s, 3)
+
+
 def get_data_url(input_dir_flow, start_year, start_month, end_year, end_month):
     pattern = input_dir_flow + "/yellow_tripdata_%d-%02d.csv"
 
@@ -92,7 +108,7 @@ def gen_config_info(file_name, interval):
             "output_dim": 2,
             "init_weight_inf_or_zero": "inf",
             "set_weight_link_or_dist": "dist",
-            "calculate_weight_adj": False,
+            "calculate_weight_adj": True,
             "weight_adj_epsilon": 0.1,
             "time_intervals": interval
         }
@@ -151,6 +167,9 @@ if __name__ == '__main__':
               '%d-%02d-%02d' % (start_year, start_month, start_day))]
     print(dataset_nyc.shape)
     # 筛选起点和终点不相等的记录
+    dataset_nyc = dataset_nyc[(dataset_nyc['PULocationID'] <= 263) & (dataset_nyc['PULocationID'] > 0)
+                      & (dataset_nyc['DOLocationID'] <= 263) & (dataset_nyc['DOLocationID'] > 0)]
+    print(dataset_nyc.shape)
     dataset_nyc = dataset_nyc[dataset_nyc['PULocationID'] != dataset_nyc['DOLocationID']]
     print(dataset_nyc.shape)
     # 转时间戳
@@ -178,36 +197,75 @@ if __name__ == '__main__':
     # 起点跟终点要在一个时间戳内
     dataset_nyc = dataset_nyc.loc[dataset_nyc['start_time_id'] == dataset_nyc['end_time_id']]
     print(dataset_nyc.shape)
-    # 计算od
-    area = set()
-    old2new = dict()
-    for idx in dataset_nyc['PULocationID']:
-        if idx not in area:
-            old2new[idx] = len(area)
-            area.add(idx)
-    for idx in dataset_nyc['DOLocationID']:
-        if idx not in area:
-            old2new[idx] = len(area)
-            area.add(idx)
+    # area = set()
+    # old2new = dict()
+    # for idx in dataset_nyc['PULocationID']:
+    #     if idx not in area:
+    #         old2new[idx] = len(area)
+    #         area.add(idx)
+    # for idx in dataset_nyc['DOLocationID']:
+    #     if idx not in area:
+    #         old2new[idx] = len(area)
+    #         area.add(idx)
+    # 输出
+    data_name = output_dir_flow + "/" + file_name
 
-    od_data = np.zeros((len(area), len(area), len(time_dividing_point) - 1))
+    location = json.load(open(input_dir_flow + '/taxi_zones_final.json', 'r'))
+    id_list = []
+    id2lon = {}
+    id2lat = {}
+    id2str = {}
+    id2type = {}
+    for i in range(len(location['features'])):
+        idx = location['features'][i]['properties']['OBJECTID']
+        id_list.append(idx)
+        id2lon[idx] = []
+        id2lat[idx] = []
+        id2str[idx] = str(location['features'][i]['geometry']['coordinates'])
+        id_type = location['features'][i]['geometry']['type']
+        id2type[idx] = id_type
+        if id_type == 'Polygon':
+            for i1 in range(len(location['features'][i]['geometry']['coordinates'])):
+                for i2 in range(len(location['features'][i]['geometry']['coordinates'][i1])):
+                    id2lon[idx].append(eval(location['features'][i]['geometry']['coordinates'][i1][i2][0]))
+                    id2lat[idx].append(eval(location['features'][i]['geometry']['coordinates'][i1][i2][1]))
+        elif id_type == 'MultiPolygon':
+            for i1 in range(len(location['features'][i]['geometry']['coordinates'])):
+                for i2 in range(len(location['features'][i]['geometry']['coordinates'][i1])):
+                    for i3 in range(len(location['features'][i]['geometry']['coordinates'][i1][i2])):
+                        id2lon[idx].append(eval(location['features'][i]['geometry']['coordinates'][i1][i2][i3][0]))
+                        id2lat[idx].append(eval(location['features'][i]['geometry']['coordinates'][i1][i2][i3][1]))
+        else:
+            print('error', i)
+        id2lon[idx] = sum(id2lon[idx]) / len(id2lon[idx])
+        id2lat[idx] = sum(id2lat[idx]) / len(id2lat[idx])
+
+    print('.rel outputing...')
+    rel = []
+    for i in id2str.keys():
+        for j in id2str.keys():
+            dist = dis(id2lon[i], id2lat[i], id2lon[j], id2lat[j]) * 1000.0
+            rel.append([len(rel), 'geo', i-1, j-1, dist])
+    rel = pd.DataFrame(rel, columns=['rel_id', 'type', 'origin_id', 'destination_id', 'cost'])
+    rel.to_csv(data_name + '.rel', index=False)
+
+    print('.geo outputing...')
+    geo = []
+    for i in id2str.keys():
+        geo.append([i-1, id2type[i], id2str[i]])
+    geo = pd.DataFrame(geo, columns=['geo_id', 'type', 'coordinates'])
+    geo.to_csv(data_name + '.geo', index=False)
+
+    # 计算od
+    od_data = np.zeros((len(id2str), len(id2str), len(time_dividing_point) - 1))
     print('od calculating...')
     for i in range(dataset_nyc.shape[0]):
         print(str(i) + '/' + str(dataset_nyc.shape[0]))
         time_id = dataset_nyc.iloc[i]['start_time_id']
-        start_geo_id = old2new[dataset_nyc.iloc[i]['PULocationID']]
-        end_geo_id = old2new[dataset_nyc.iloc[i]['DOLocationID']]
+        start_geo_id = dataset_nyc.iloc[i]['PULocationID'] - 1
+        end_geo_id = dataset_nyc.iloc[i]['DOLocationID'] - 1
         od_data[start_geo_id][end_geo_id][time_id] = od_data[start_geo_id][end_geo_id][time_id] + 1
-    np.save('nyc_taxi_od.npy', od_data)
-    print('Saved nyc_taxi_od.npy.')
-    # 输出
-    data_name = output_dir_flow + "/" + file_name
-    print('.geo outputing...')
-    geo_data = pd.DataFrame(columns=['geo_id', 'type', 'coordinates'])
-    geo_data['geo_id'] = list(range(len(area)))
-    geo_data.loc[:, 'type'] = 'Polygon'
-    geo_data.loc[:, 'coordinates'] = '[[ [] ]]'
-    geo_data.to_csv(data_name + '.geo', index=False)
+
     print('.od outputing...')
     dyna_id = 0
     dyna_file = open(data_name + '.od', 'w')
