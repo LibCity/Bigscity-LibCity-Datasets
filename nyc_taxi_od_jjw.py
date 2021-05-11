@@ -105,6 +105,7 @@ def gen_config_info(file_name, interval):
                 file_name
             ],
             "geo_file": file_name,
+            "rel_file": file_name,
             "output_dim": 2,
             "init_weight_inf_or_zero": "inf",
             "set_weight_link_or_dist": "dist",
