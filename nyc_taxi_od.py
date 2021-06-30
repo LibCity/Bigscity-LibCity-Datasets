@@ -1,13 +1,25 @@
 import json
 import math
 import os
-from datetime import datetime
-
+import time
 import numpy as np
 import pandas as pd
 
-old_time_format = '%Y-%m-%d %H:%M:%S'
-new_time_format = '%Y-%m-%dT%H:%M:%SZ'
+
+def rad(d):
+    return d * math.pi / 180.0
+
+
+def dis(lng1, lat1, lng2, lat2):  # 经度1 纬度1 经度2 纬度2
+    EARTH_RADIUS = 6378.137
+    radLat1 = rad(lat1)
+    radLat2 = rad(lat2)
+    a = radLat1 - radLat2
+    b = rad(lng1) - rad(lng2)
+    s = 2 * math.asin(math.sqrt(math.pow(math.sin(a / 2), 2) +
+                    math.cos(radLat1) * math.cos(radLat2) * math.pow(math.sin(b / 2), 2)))
+    s = s * EARTH_RADIUS
+    return round(s, 3)
 
 
 def get_data_url(input_dir_flow, start_year, start_month, end_year, end_month):
@@ -29,23 +41,6 @@ def get_data_url(input_dir_flow, start_year, start_month, end_year, end_month):
     return data_url
 
 
-def handle_area_geo(df):
-    """
-    :param df:
-    :return: df['a_id']
-    """
-    start = df[['PULocationID']]
-    start.columns = ['a_id']
-    end = df[['DOLocationID']]
-    end.columns = ['a_id']
-    area_data = pd.concat((start, end), axis=0)
-    area_data['a_id'] = area_data['a_id'].astype('int')
-    area_data = area_data.sort_values(by='a_id', ascending=True)
-    area_data = area_data[['a_id']]
-    area_data = area_data.drop_duplicates()
-    return area_data
-
-
 def judge_id(value, dividing_points, equally=True):
     if equally:
         min_v = dividing_points[0]
@@ -58,141 +53,6 @@ def judge_id(value, dividing_points, equally=True):
             if value <= num:
                 return i - 1
         return len(dividing_points)
-
-
-def get_geo_data(area_geo):
-    """
-    :param area_geo:
-    :return: df['geo_id', 'type', 'coordinates']
-    """
-    # generate gird data (.geo)
-    geo_data = pd.DataFrame(
-        columns=['geo_id', 'type', 'coordinates'])
-    geo_data['geo_id'] = area_geo['a_id']
-    geo_data.loc[:, 'type'] = 'state'
-    geo_data.loc[:, 'coordinates'] = '[[ [] ]]'
-    return geo_data
-
-
-def convert_time(df):
-    """
-    old_time_format = '%Y-%m-%d %H:%M:%S'
-    new_time_format = '%Y-%m-%dT%H:%M:%SZ'
-    """
-
-    df['time'] = df.apply(
-        lambda x: x['time_str'].replace(' ', 'T') + 'Z',
-        axis=1)
-    df['timestamp'] = df.apply(
-        lambda x: float(datetime.timestamp(
-            pd.to_datetime(x['time_str'],
-                           utc=True,
-                           format=old_time_format))),
-        axis=1)
-    return df
-
-
-def convert_to_trajectory(df):
-    """
-    :param df: all data
-    :return: df['driveid', 'geo_id', 'time', 'timestamp']
-    """
-    start = df[['drive_id', 'PULocationID', 'tpep_pickup_datetime']]
-    end = df[['drive_id', 'DOLocationID', 'tpep_dropoff_datetime']]
-    start.columns = ['driveid', 'geo_id', 'time_str']
-    end.columns = ['driveid', 'geo_id', 'time_str']
-    trajectory_data = pd.concat((start, end), axis=0)
-    trajectory_data = trajectory_data.loc[trajectory_data['geo_id'].apply(lambda x: not math.isnan(x))]
-    trajectory_data = convert_time(trajectory_data)
-    return trajectory_data[['driveid', 'geo_id', 'time', 'timestamp']]
-
-
-def add_previous_poi(tra_by_taxi):
-    tra_by_taxi = tra_by_taxi.sort_values(by='time')
-    tra_by_taxi['prev_geo_id'] = tra_by_taxi['geo_id'].shift(1)
-    tra_by_taxi['prev_time'] = tra_by_taxi['time'].shift(1)
-    tra_by_taxi['prev_timestamp'] = tra_by_taxi['timestamp'].shift(1)
-    return tra_by_taxi[1:]
-
-
-def judge_time_id(df, time_dividing_point):
-    df['time_id'] = df.apply(
-        lambda x: judge_id(x['timestamp'], time_dividing_point),
-        axis=1
-    )
-    df['prev_time_id'] = df.apply(
-        lambda x: judge_id(x['prev_timestamp'], time_dividing_point),
-        axis=1
-    )
-    return df
-
-
-def timestamp2str(timestamp):
-    return pd.to_datetime(timestamp, unit='s').strftime(new_time_format)
-
-
-def gen_empty_od_data(area, time_dividing_point):
-    od_id = 0
-    od_data = pd.DataFrame(columns=['od_id', 'type', 'time',
-                                    'origin_id', 'destination_id', 'flow'])
-    a_ids = area['a_id']
-    for ori_id in a_ids:
-        for des_id in a_ids:
-            for t in time_dividing_point:
-                od_data.loc[od_id] = [od_id, 'state', timestamp2str(t), ori_id, des_id, 0]
-                od_id += 1
-    return od_data
-
-
-def calculate_od(trajectory_data, area, interval):
-    taxi_trajectory = trajectory_data.groupby(by='driveid')
-    taxi_trajectory = pd.concat(
-        map(lambda x: add_previous_poi(x[1]), taxi_trajectory))
-    taxi_trajectory = taxi_trajectory[
-        taxi_trajectory['geo_id'] != taxi_trajectory['prev_geo_id']]
-
-    taxi_trajectory = taxi_trajectory.sort_values(by='timestamp')
-    min_timestamp = float(
-        math.floor(
-            taxi_trajectory['timestamp'].values[0] / interval) * interval)
-    max_timestamp = float(
-        math.ceil(
-            taxi_trajectory['timestamp'].values[-1] / interval) * interval)
-    time_dividing_point = \
-        list(np.arange(min_timestamp, max_timestamp, interval))
-    taxi_trajectory = judge_time_id(taxi_trajectory, time_dividing_point)
-    taxi_trajectory = \
-        taxi_trajectory.loc[taxi_trajectory['time_id'] == taxi_trajectory['prev_time_id']]
-
-    od_data = gen_empty_od_data(area, time_dividing_point)
-    for index, row in taxi_trajectory.iterrows():
-        time_id = judge_id(row['timestamp'], time_dividing_point)
-        time_str = timestamp2str(time_dividing_point[time_id])
-        prev_geo_id = row['prev_geo_id']
-        geo_id = row['geo_id']
-        od_data['flow'] = list(map(lambda time, origin_id, destination_id, flow:
-                                   flow + 1 if time == time_str and origin_id == prev_geo_id and destination_id == geo_id
-                                   else flow, od_data.time, od_data.origin_id, od_data.destination_id, od_data.flow))
-
-    return od_data
-
-
-def nyc_taxi_flow(
-        output_dir, output_name, data_set, interval=3600):
-    data_name = output_dir + "/" + output_name
-
-    # geo data
-    area = handle_area_geo(data_set)
-    print('finish geo')
-
-    # trajectory data
-    trajectory_data = convert_to_trajectory(data_set)
-    print('finish trajectory')
-
-    # od data
-    od_data = calculate_od(trajectory_data, area, interval=interval)
-    od_data.to_csv(data_name + '.od', index=False)
-    print('finish od')
 
 
 def gen_config_geo():
@@ -245,6 +105,7 @@ def gen_config_info(file_name, interval):
                 file_name
             ],
             "geo_file": file_name,
+            "rel_file": file_name,
             "output_dim": 2,
             "init_weight_inf_or_zero": "inf",
             "set_weight_link_or_dist": "dist",
@@ -259,7 +120,6 @@ def gen_config(output_dir_flow, file_name, interval):
     config = {}
     data = json.loads(json.dumps(config))
     data["geo"] = gen_config_geo()
-    data["dyna"] = gen_config_dyna()
     data['od'] = gen_config_od()
     data["info"] = gen_config_info(file_name, interval)
     config = json.dumps(data)
@@ -269,12 +129,15 @@ def gen_config(output_dir_flow, file_name, interval):
 
 
 if __name__ == '__main__':
+    start_time = time.time()
     interval = 3600
-    (start_year, start_month) = (2020, 6)
-    (end_year, end_month) = (2020, 6)
+    # 开始年月
+    (start_year, start_month, start_day) = (2020, 4, 1)
+    # 结束年月
+    (end_year, end_month, end_day) = (2020, 6, 30)
 
     file_name = 'NYCTAXI%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
-    output_dir_flow = 'output/NYCTAXI%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    output_dir_flow = 'output/NYCTAXI%d%02d-%d%02d_od' % (start_year, start_month, end_year, end_month)
     input_dir_flow = 'input/NYC-Taxi'
     data_url = get_data_url(input_dir_flow=input_dir_flow,
                             start_year=start_year,
@@ -283,29 +146,143 @@ if __name__ == '__main__':
                             end_month=end_month
                             )
     data_url = tuple(data_url)
+    print(data_url)
     if not os.path.exists(output_dir_flow):
         os.makedirs(output_dir_flow)
 
-    dataset_nyc = pd.concat(
-        map(lambda x: pd.read_csv(x, index_col=False), data_url), axis=0
-    )
+    dataset_nyc = pd.concat(map(lambda x: pd.read_csv(x, index_col=False), data_url), axis=0)
     dataset_nyc.reset_index(drop=True, inplace=True)
-    data_num = dataset_nyc.shape[0]
-    dataset_nyc["drive_id"] = list(range(data_num))
+    print(dataset_nyc.shape)
+    dataset_nyc = dataset_nyc[['tpep_pickup_datetime', 'tpep_dropoff_datetime', 'PULocationID', 'DOLocationID']]
+    print(dataset_nyc.shape)
+    # data_num = dataset_nyc.shape[0]
+    # dataset_nyc["drive_id"] = list(range(data_num))
+    # 筛除非法时间
     dataset_nyc = dataset_nyc.loc[dataset_nyc['tpep_pickup_datetime'].
         apply(lambda x:
-              '%d-%02d-%02d' % (end_year, end_month, 30) >= x[:10] >= '%d-%02d-%02d' % (start_year, start_month, 1))]
+              '%d-%02d-%02d' % (end_year, end_month, end_day) >= x[:10] >=
+              '%d-%02d-%02d' % (start_year, start_month, start_day))]
     dataset_nyc = dataset_nyc.loc[dataset_nyc['tpep_dropoff_datetime'].
         apply(lambda x:
-              '%d-%02d-%02d' % (end_year, end_month, 30) >= x[:10] >= '%d-%02d-%02d' % (start_year, start_month, 1))]
-    print('finish read csv')
+              '%d-%02d-%02d' % (end_year, end_month, end_day) >= x[:10] >=
+              '%d-%02d-%02d' % (start_year, start_month, start_day))]
+    print(dataset_nyc.shape)
+    # 筛选起点和终点不相等的记录
+    dataset_nyc = dataset_nyc[(dataset_nyc['PULocationID'] <= 263) & (dataset_nyc['PULocationID'] > 0)
+                      & (dataset_nyc['DOLocationID'] <= 263) & (dataset_nyc['DOLocationID'] > 0)]
+    print(dataset_nyc.shape)
+    dataset_nyc = dataset_nyc[dataset_nyc['PULocationID'] != dataset_nyc['DOLocationID']]
+    print(dataset_nyc.shape)
+    # 转时间戳
+    dataset_nyc['start_timestamp'] = dataset_nyc.apply(
+        lambda x: time.mktime(time.strptime(x['tpep_pickup_datetime'], '%Y-%m-%d %H:%M:%S')), axis=1)
+    dataset_nyc['end_timestamp'] = dataset_nyc.apply(
+        lambda x: time.mktime(time.strptime(x['tpep_dropoff_datetime'], '%Y-%m-%d %H:%M:%S')), axis=1)
+    print(dataset_nyc.shape)
+    min_timestamp = min(dataset_nyc['start_timestamp'].min(), dataset_nyc['end_timestamp'].min())
+    max_timestamp = max(dataset_nyc['start_timestamp'].max(), dataset_nyc['end_timestamp'].max())
+    min_timestamp = float(math.floor(min_timestamp / interval) * interval)
+    max_timestamp = float(math.ceil(max_timestamp / interval) * interval)
+    # 按照时间间隔分段
+    time_dividing_point = list(np.arange(min_timestamp, max_timestamp, interval))
+    convert = []
+    for t in time_dividing_point:
+        convert.append(time.strftime('%Y-%m-%dT%H:%M:%SZ', time.localtime(t)))
+    print(dataset_nyc.shape)
+    # 计算每个时间属于哪一段
+    dataset_nyc['start_time_id'] = dataset_nyc.apply(
+        lambda x: judge_id(x['start_timestamp'], time_dividing_point), axis=1)
+    dataset_nyc['end_time_id'] = dataset_nyc.apply(
+        lambda x: judge_id(x['end_timestamp'], time_dividing_point), axis=1)
+    print(dataset_nyc.shape)
+    # 起点跟终点要在一个时间戳内
+    dataset_nyc = dataset_nyc.loc[dataset_nyc['start_time_id'] == dataset_nyc['end_time_id']]
+    print(dataset_nyc.shape)
+    # area = set()
+    # old2new = dict()
+    # for idx in dataset_nyc['PULocationID']:
+    #     if idx not in area:
+    #         old2new[idx] = len(area)
+    #         area.add(idx)
+    # for idx in dataset_nyc['DOLocationID']:
+    #     if idx not in area:
+    #         old2new[idx] = len(area)
+    #         area.add(idx)
+    # 输出
+    data_name = output_dir_flow + "/" + file_name
 
-    nyc_taxi_flow(
-        output_dir_flow,
-        file_name,
-        dataset_nyc,
-        interval=interval
-    )
-    print('finish')
+    location = json.load(open(input_dir_flow + '/taxi_zones_final.json', 'r'))
+    id_list = []
+    id2lon = {}
+    id2lat = {}
+    id2str = {}
+    id2type = {}
+    for i in range(len(location['features'])):
+        idx = location['features'][i]['properties']['OBJECTID']
+        id_list.append(idx)
+        id2lon[idx] = []
+        id2lat[idx] = []
+        id2str[idx] = str(location['features'][i]['geometry']['coordinates'])
+        id_type = location['features'][i]['geometry']['type']
+        id2type[idx] = id_type
+        if id_type == 'Polygon':
+            for i1 in range(len(location['features'][i]['geometry']['coordinates'])):
+                for i2 in range(len(location['features'][i]['geometry']['coordinates'][i1])):
+                    id2lon[idx].append(eval(location['features'][i]['geometry']['coordinates'][i1][i2][0]))
+                    id2lat[idx].append(eval(location['features'][i]['geometry']['coordinates'][i1][i2][1]))
+        elif id_type == 'MultiPolygon':
+            for i1 in range(len(location['features'][i]['geometry']['coordinates'])):
+                for i2 in range(len(location['features'][i]['geometry']['coordinates'][i1])):
+                    for i3 in range(len(location['features'][i]['geometry']['coordinates'][i1][i2])):
+                        id2lon[idx].append(eval(location['features'][i]['geometry']['coordinates'][i1][i2][i3][0]))
+                        id2lat[idx].append(eval(location['features'][i]['geometry']['coordinates'][i1][i2][i3][1]))
+        else:
+            print('error', i)
+        id2lon[idx] = sum(id2lon[idx]) / len(id2lon[idx])
+        id2lat[idx] = sum(id2lat[idx]) / len(id2lat[idx])
 
+    print('.rel outputing...')
+    rel = []
+    for i in id2str.keys():
+        for j in id2str.keys():
+            dist = dis(id2lon[i], id2lat[i], id2lon[j], id2lat[j]) * 1000.0
+            rel.append([len(rel), 'geo', i-1, j-1, dist])
+    rel = pd.DataFrame(rel, columns=['rel_id', 'type', 'origin_id', 'destination_id', 'cost'])
+    rel.to_csv(data_name + '.rel', index=False)
+
+    print('.geo outputing...')
+    geo = []
+    for i in id2str.keys():
+        geo.append([i-1, id2type[i], id2str[i]])
+    geo = pd.DataFrame(geo, columns=['geo_id', 'type', 'coordinates'])
+    geo.to_csv(data_name + '.geo', index=False)
+
+    # 计算od
+    od_data = np.zeros((len(id2str), len(id2str), len(time_dividing_point) - 1))
+    print('od calculating...')
+    for i in range(dataset_nyc.shape[0]):
+        print(str(i) + '/' + str(dataset_nyc.shape[0]))
+        time_id = dataset_nyc.iloc[i]['start_time_id']
+        start_geo_id = dataset_nyc.iloc[i]['PULocationID'] - 1
+        end_geo_id = dataset_nyc.iloc[i]['DOLocationID'] - 1
+        od_data[start_geo_id][end_geo_id][time_id] = od_data[start_geo_id][end_geo_id][time_id] + 1
+
+    print('.od outputing...')
+    dyna_id = 0
+    dyna_file = open(data_name + '.od', 'w')
+    dyna_file.write('dyna_id,' + 'type,' + 'time,' + 'origin_id,' + 'destination_id,' + 'flow' + '\n')
+    for j in range(od_data.shape[0]):
+        for k in range(od_data.shape[1]):
+            for i in range(od_data.shape[2]):
+                times = convert[i]
+                dyna_file.write(str(dyna_id) + ',' + 'state' + ',' + str(times)
+                                + ',' + str(j) + ',' + str(k)
+                                + ',' + str(od_data[j][k][i]) + '\n')
+                dyna_id = dyna_id + 1
+                if dyna_id % 10000 == 0:
+                    print(str(dyna_id) + '//' + str(od_data.shape[0] * od_data.shape[1] * od_data.shape[2]))
+    dyna_file.close()
+    print('finish！')
     gen_config(output_dir_flow, file_name, interval)
+    end_time = time.time()
+    print(end_time - start_time)

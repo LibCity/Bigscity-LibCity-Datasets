@@ -3,11 +3,11 @@ import pickle
 import pandas as pd
 import json
 
-outputdir = 'output/SHMetro'
+outputdir = 'output/SHMETRO'
 util.ensure_dir(outputdir)
 
 dataurl = 'input/SHMetro/'
-dataname = outputdir + '/SHMetro'
+dataname = outputdir + '/SHMETRO'
 
 data = {}
 for category in ['train', 'val', 'test']:
@@ -116,9 +116,9 @@ config['dyna']['state'] = {'entity_id': 'geo_id', 'inflow': 'num', 'outflow': 'n
 config['info'] = dict()
 config['info']['data_col'] = ['inflow', 'outflow']
 config['info']['weight_col'] = ['connection']
-config['info']['data_files'] = ['SHMetro']
-config['info']['geo_file'] = 'SHMetro'
-config['info']['rel_file'] = 'SHMetro'
+config['info']['data_files'] = ['SHMETRO']
+config['info']['geo_file'] = 'SHMETRO'
+config['info']['rel_file'] = 'SHMETRO'
 config['info']['output_dim'] = 2
 config['info']['time_intervals'] = 900
 config['info']['init_weight_inf_or_zero'] = 'inf'

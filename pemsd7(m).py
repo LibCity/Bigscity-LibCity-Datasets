@@ -4,11 +4,11 @@ import util
 import time
 
 
-outputdir = 'output/PeMSD7(M)'
+outputdir = 'output/PEMSD7(M)'
 util.ensure_dir(outputdir)
 
 dataurl = 'input/PeMSD7(M)/'
-dataname = outputdir+'/PeMSD7(M)'
+dataname = outputdir+'/PEMSD7(M)'
 
 dataset = pd.read_csv(dataurl+'PeMSD7_W_228.csv', header=None)
 geo = []
@@ -78,9 +78,9 @@ config['dyna']['state'] = {'entity_id': 'geo_id', 'traffic_speed': 'num'}
 config['info'] = dict()
 config['info']['data_col'] = ['traffic_speed']
 config['info']['weight_col'] = 'weight'
-config['info']['data_files'] = ['PeMSD7(M)']
-config['info']['geo_file'] = 'PeMSD7(M)'
-config['info']['rel_file'] = 'PeMSD7(M)'
+config['info']['data_files'] = ['PEMSD7(M)']
+config['info']['geo_file'] = 'PEMSD7(M)'
+config['info']['rel_file'] = 'PEMSD7(M)'
 config['info']['output_dim'] = 1
 config['info']['time_intervals'] = 300
 config['info']['init_weight_inf_or_zero'] = 'inf'

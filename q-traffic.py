@@ -3,11 +3,11 @@ from tqdm import tqdm
 import json
 import util
 
-outputdir = 'output/Q-TRAFFIC'
+outputdir = 'output/Q_TRAFFIC'
 util.ensure_dir(outputdir)
 
 dataurl = 'input/Q-TRAFFIC/'
-dataname = outputdir + '/Q-TRAFFIC'
+dataname = outputdir + '/Q_TRAFFIC'
 
 
 def id_to_time(id):
@@ -187,9 +187,9 @@ config['dyna']['state'] = {'entity_id': 'geo_id', 'traffic_speed': 'num'}
 config['info'] = dict()
 config['info']['data_col'] = 'traffic_speed'
 config['info']['weight_col'] = 'link_weight'
-config['info']['data_files'] = ['Q-TRAFFIC']
-config['info']['geo_file'] = 'Q-TRAFFIC'
-config['info']['rel_file'] = 'Q-TRAFFIC'
+config['info']['data_files'] = ['Q_TRAFFIC']
+config['info']['geo_file'] = 'Q_TRAFFIC'
+config['info']['rel_file'] = 'Q_TRAFFIC'
 config['info']['output_dim'] = 1
 config['info']['time_intervals'] = 900
 config['info']['init_weight_inf_or_zero'] = 'zero'

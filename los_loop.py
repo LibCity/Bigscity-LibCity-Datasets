@@ -5,11 +5,11 @@ import sys
 import util
 import h5py
 
-outputdir = 'output/LOS-LOOP'
+outputdir = 'output/LOS_LOOP'
 util.ensure_dir(outputdir)
 
 dataurl = 'input/LOS-LOOP/'
-dataname = outputdir+'/LOS-LOOP'
+dataname = outputdir+'/LOS_LOOP'
 
 
 los_dataset = h5py.File(dataurl+'Los_traffic.h5', 'r')
@@ -101,9 +101,9 @@ config['dyna']['state'] = {'entity_id': 'geo_id', 'traffic_speed': 'num'}
 config['info'] = dict()
 config['info']['data_col'] = ['traffic_speed']
 config['info']['weight_col'] = 'link_weight'
-config['info']['data_files'] = ['LOS-LOOP']
-config['info']['geo_file'] = 'LOS-LOOP'
-config['info']['rel_file'] = 'LOS-LOOP'
+config['info']['data_files'] = ['LOS_LOOP']
+config['info']['geo_file'] = 'LOS_LOOP'
+config['info']['rel_file'] = 'LOS_LOOP'
 config['info']['output_dim'] = 1
 config['info']['time_intervals'] = 300
 config['info']['init_weight_inf_or_zero'] = 'inf'

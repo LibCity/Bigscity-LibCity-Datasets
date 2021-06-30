@@ -5,26 +5,56 @@ from datetime import datetime
 import numpy as np
 import time
 
-# total number of points:15 million
-# the total distance of the trajectories: 9 million km
-# average sampling interval: 177 seconds with a distance of about 623 meters.
-# taxi_id, date_time, longitude, latitude
-# 北京左上角(39.83°, 116.25°)，右下角(40.12°, 116.64°)，划分成了32 * 32的网格。
-TAXI_NUM = 10357
-LAT_MIN = 39.83
-LAT_MAX = 40.12
-LON_MIN = 116.25
-LON_MAX = 116.64
 old_time_format = '%Y-%m-%d %H:%M:%S'
 new_time_format = '%Y-%m-%dT%H:%M:%SZ'
-MIN_TIME = '2008-02-02 00:00:00'
-MAX_TIME = '2008-02-09 00:00:00'
+MIN_TIME = '2013-07-01 00:00:00'
+MAX_TIME = '2014-07-01 00:00:00'
 MIN_TIMESTAMP = float(
     datetime.timestamp(
         pd.to_datetime(MIN_TIME, utc=True, format=old_time_format)))
 MAX_TIMESTAMP = float(
     datetime.timestamp(
         pd.to_datetime(MAX_TIME, utc=True, format=old_time_format)))
+
+
+def split_polyline(data):
+    # step 1: delete prefix [[ and postfix ]] in data['polyline']
+    data['polyline'] = data['polyline'].apply(lambda x: x[2:-2])
+
+    # step 2: horizontally divide polyline into many lines,each line
+    #           contains single point
+    data_split = data.drop('polyline', axis=1).join(
+        data['polyline'].str.split(
+            r'\],\[', expand=True
+        ).stack().reset_index(
+            level=1, drop=True
+        ).rename('poly'))
+    data_split.reset_index(drop=True, inplace=True)
+    data_split['prev_taxi_id'] = data_split['taxi_id'].shift(1)
+    data_split.loc[0, 'prev_taxi_id'] = -1
+    data_split['prev_taxi_id'] = data_split['prev_taxi_id'].astype('int')
+    time_acc = 0
+    for index, line in data_split.iterrows():
+        if line['taxi_id'] == line['prev_taxi_id']:
+            time_acc += 15 * 1000
+            data_split.loc[index, 'timestamp'] += time_acc
+        else:
+            time_acc = 0
+
+    # step 3: vertically divide poly into longitude and latitude
+    data_split[['longitude', 'latitude']] =\
+        data_split['poly'].str.split(',', n=1, expand=True)
+    data_split.drop('poly', axis=1, inplace=True)
+    data_split['longitude'] = data_split['longitude'].str.strip()
+    data_split['latitude'] = data_split['latitude'].str.strip()
+
+    # step 4: drop lines that contains null data
+    data_split.dropna(subset=['longitude', 'latitude'], inplace=True)
+
+    # step 5: change data type of lat and lon from str to double
+    data_split['longitude'] = data_split['longitude'].astype('float')
+    data_split['latitude'] = data_split['latitude'].astype('float')
+    return data_split
 
 
 def judge_id(value, dividing_points, equally=True):
@@ -43,29 +73,38 @@ def judge_id(value, dividing_points, equally=True):
 
 def partition_to_grid(data_set, row_num, col_num):
     """
-    :param data_set: ['taxi_id', 'date_time', 'longitude', 'latitude']
+    :param data_set: ['taxi_id', 'timestamp', 'longitude', 'latitude']
     :param row_num: # of rows
     :param col_num: # of columns
     :return: data_set_with_rc_id:
-                        ['taxi id', 'date_time', 'row_id', 'column_id']
+                        ['taxi_id', 'timestamp', 'row_id', 'column_id']
     :return: geo_data['geo_id', 'type', 'coordinates', 'row_id', 'column_id']
     """
     # handle row/latitude
+    data_set = data_set.sort_values(by='latitude')
+    lat_values = data_set['latitude'].values
+    LAT_MAX = lat_values[-1]
+    LAT_MIN = lat_values[0]
     lat_diff = LAT_MAX - LAT_MIN
     lat_dividing_points = \
         [round(LAT_MIN + lat_diff / row_num * i, 3)
          for i in range(row_num + 1)]
-    # print(len(lat_dividing_points))
+    # print(lat_dividing_points)
     data_set['row_id'] = data_set.apply(
         lambda x: judge_id(x['latitude'], lat_dividing_points),
         axis=1
     )
 
     # handle col/longitude
+    data_set = data_set.sort_values(by='longitude')
+    lon_values = data_set['longitude'].values
+    LON_MAX = lon_values[-1]
+    LON_MIN = lon_values[0]
     lon_diff = LON_MAX - LON_MIN
     lon_dividing_points = \
         [round(LON_MIN + lon_diff / col_num * i, 3)
          for i in range(col_num + 1)]
+    # print(lon_dividing_points)
     data_set['column_id'] = data_set.apply(
         lambda x: judge_id(x['longitude'], lon_dividing_points),
         axis=1
@@ -86,26 +125,21 @@ def partition_to_grid(data_set, row_num, col_num):
             ]]  # list of list of [lon, lat]
             geo_data.loc[index] = [index, 'Polygon', coordinates, i, j]
 
-    return data_set[['taxi_id', 'date_time', 'row_id', 'column_id']], geo_data
+    return data_set[['taxi_id', 'timestamp', 'row_id', 'column_id']], geo_data
 
 
 def convert_time(df):
     df['time'] = df.apply(
-        lambda x: x['date_time'].replace(' ', 'T') + 'Z',
-        axis=1)
-    df['timestamp'] = df.apply(
-        lambda x: float(datetime.timestamp(
-            pd.to_datetime(x['date_time'],
-                           utc=True,
-                           format=old_time_format))),
+        lambda x:
+        datetime.fromtimestamp(x['timestamp']).strftime(new_time_format),
         axis=1)
     return df
 
 
 def convert_to_trajectory(df):
     """
-    :param df: ['taxi id', 'date time', 'row_id', 'column_id']
-    :return: df: ['taxi id', 'time', 'row_id', 'column_id', 'timestamp']
+    :param df: ['taxi_id', 'date_time', 'row_id', 'column_id']
+    :return: df: ['taxi_id', 'time', 'row_id', 'column_id', 'timestamp']
     """
     trajectory_data = convert_time(df)
     return trajectory_data[
@@ -243,7 +277,7 @@ def calculate_flow(
     return flow_data
 
 
-def t_drive_flow(
+def Porto_flow(
         output_dir, output_name, data_set, row_num, col_num, interval=3600):
     data_name = output_dir + "/" + output_name
 
@@ -256,7 +290,7 @@ def t_drive_flow(
 
     # trajectory data, add timestamp
     trajectory_data = convert_to_trajectory(data_set_with_rc_id)
-    # trajectory_data.to_csv('trajectory_data.geo', index=False)
+    trajectory_data.to_csv('trajectory_data.csv', index=False)
     print('finish trajectory')
 
     # flow data
@@ -324,76 +358,72 @@ def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
     data["geo"] = gen_config_geo()
     data["grid"] = gen_config_grid(row_num, column_num)
     data["info"] = gen_config_info(file_name, interval)
-    config = json.dumps(data)
+    # config = json.dumps(data)
     with open(output_dir_flow + "/config.json", "w") as f:
         json.dump(data, f, ensure_ascii=False, indent=1)
     # print(config)
+    print('finish config')
 
 
 if __name__ == '__main__':
     start_time = time.time()
     # 参数
-    # 测试时选取的taxi数量
-    test_taxi_num = TAXI_NUM
-    # test_taxi_num = 500
     # 时间间隔
     interval = 3600
-    # 开始年月
-    (start_year, start_month, start_day) = (2008, 2, 2)
-    # 结束年月
-    (end_year, end_month, end_day) = (2008, 2, 8)
     # 行数
-    row_num = 32
+    row_num = 20
     # 列数
-    column_num = 32
+    column_num = 10
+    # 开始年月
+    (start_year, start_month, start_day) = (2013, 7, 1)
+    # 结束年月
+    (end_year, end_month, end_day) = (2013, 9, 30)
+    # 输入文件名称
+    # input_file_name = 'Porto_1000.csv'
+    input_file_name = 'train.csv'
     # 输出文件名称
-    file_name = 'T-Drive%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    file_name = input_file_name.split('.')[0]
     # 输出文件夹名称
-    output_dir_flow = 'output/T-Drive%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    output_dir_flow = 'output/' + file_name + '/'
     # 输入文件夹名称
-    input_dir_flow = 'input/T-Drive'
+    input_dir_flow = 'input/Porto/'
 
-    data_url = [
-        input_dir_flow + '/' + str(i + 1) + '.txt'
-        for i in range(test_taxi_num)]
-    print(data_url)
+    data_url = input_dir_flow + input_file_name
 
     # 创建输出文件夹
     if not os.path.exists(output_dir_flow):
         os.makedirs(output_dir_flow)
 
-    # 对空文件进行过滤
-    data_urls = []
-    for i in data_url:
-        if os.path.getsize(i) != 0:
-            data_urls.append(i)
-    # 读入文件并实现拼接
-    data_set_t = pd.concat(
-        map(lambda x: pd.read_csv(x, header=None), data_urls), axis=0
-    )  # 纵向拼接数据
-    data_set_t.reset_index(drop=True, inplace=True)
-    data_set_t.columns = ['taxi_id', 'date_time', 'longitude', 'latitude']
+    # 读入文件
+    data_set_Porto = pd.read_csv(data_url, usecols=[4, 5, 8])
+    data_set_Porto.reset_index(drop=True, inplace=True)
+    data_set_Porto.columns = ['taxi_id', 'timestamp', 'polyline']
+    print(data_set_Porto.shape)
 
-    # 过滤超出北京范围的数据
-    data_set_t = data_set_t.loc[
-        data_set_t['longitude'].apply(lambda x:(LON_MIN <= x <= LON_MAX))]
-    data_set_t = data_set_t.loc[
-        data_set_t['latitude'].apply(lambda x: (LAT_MIN <= x <= LAT_MAX))]
-
+    dt1 = '%d-%02d-%02dT00:00:00Z' % (start_year, start_month, start_day)
+    dt2 = '%d-%02d-%02dT23:59:59Z' % (end_year, end_month, end_day)
+    stimes = time.mktime(time.strptime(dt1, '%Y-%m-%dT%H:%M:%SZ'))
+    etimes = time.mktime(time.strptime(dt2, '%Y-%m-%dT%H:%M:%SZ'))
+    data_set_Porto = data_set_Porto[(data_set_Porto['timestamp'] <= etimes)
+                                    & (data_set_Porto['timestamp'] >= stimes)]
+    print(data_set_Porto.shape)
     print('finish read csv')
-    # data_set_t.to_csv('concat.csv', line_terminator='\n')
+
+    # 对输入文件进行预处理，分割出polyline的数据
+    data_set_Porto = split_polyline(data_set_Porto)
+    print('finish split polyline')
 
     # 调用处理函数，生成.grid 和.geo文件
-    t_drive_flow(
+    Porto_flow(
         output_dir_flow,
         file_name,
-        data_set_t,
+        data_set_Porto,
         row_num,
         column_num,
         interval=interval
     )
     # 生成config.json文件
     gen_config(output_dir_flow, file_name, row_num, column_num, interval)
-    print('finish config')
+    print('finish')
     end_time = time.time()
     print(end_time - start_time)

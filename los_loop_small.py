@@ -4,11 +4,11 @@ import json
 import sys
 import util
 
-outputdir = 'output/LOS-LOOP-SMALL'
+outputdir = 'output/LOS_LOOP_SMALL'
 util.ensure_dir(outputdir)
 
 dataurl = 'input/LOS-LOOP/'
-dataname = outputdir + '/LOS-LOOP-SMALL'
+dataname = outputdir + '/LOS_LOOP_SMALL'
 
 # los_dataset = h5py.File(dataurl+'Los_traffic.h5','r')
 # los_speed = los_dataset.get('df')['axis0']
@@ -100,9 +100,9 @@ config['dyna']['state'] = {'entity_id': 'geo_id', 'traffic_speed': 'num'}
 config['info'] = dict()
 config['info']['data_col'] = ['traffic_speed']
 config['info']['weight_col'] = 'link_weight'
-config['info']['data_files'] = ['LOS-LOOP-SMALL']
-config['info']['geo_file'] = 'LOS-LOOP-SMALL'
-config['info']['rel_file'] = 'LOS-LOOP-SMALL'
+config['info']['data_files'] = ['LOS_LOOP_SMALL']
+config['info']['geo_file'] = 'LOS_LOOP_SMALL'
+config['info']['rel_file'] = 'LOS_LOOP_SMALL'
 config['info']['output_dim'] = 1
 config['info']['time_intervals'] = 300
 config['info']['init_weight_inf_or_zero'] = 'inf'

@@ -3,11 +3,11 @@ import pickle
 import pandas as pd
 import json
 
-outputdir = 'output/HZMetro'
+outputdir = 'output/HZMETRO'
 util.ensure_dir(outputdir)
 
 dataurl = 'input/HZMetro/'
-dataname = outputdir + '/HZMetro'
+dataname = outputdir + '/HZMETRO'
 
 data = {}
 for category in ['train', 'val', 'test']:
@@ -116,9 +116,9 @@ config['dyna']['state'] = {'entity_id': 'geo_id', 'inflow': 'num', 'outflow': 'n
 config['info'] = dict()
 config['info']['data_col'] = ['inflow', 'outflow']
 config['info']['weight_col'] = ['connection']
-config['info']['data_files'] = ['HZMetro']
-config['info']['geo_file'] = 'HZMetro'
-config['info']['rel_file'] = 'HZMetro'
+config['info']['data_files'] = ['HZMETRO']
+config['info']['geo_file'] = 'HZMETRO'
+config['info']['rel_file'] = 'HZMETRO'
 config['info']['output_dim'] = 2
 config['info']['time_intervals'] = 900
 config['info']['init_weight_inf_or_zero'] = 'inf'

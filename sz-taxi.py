@@ -3,11 +3,11 @@ import pandas as pd
 import json
 import util
 
-outputdir = 'output/SZ-TAXI'
+outputdir = 'output/SZ_TAXI'
 util.ensure_dir(outputdir)
 
 dataurl = 'input/SZ-TAXI/'
-dataname = outputdir+'/SZ-TAXI'
+dataname = outputdir+'/SZ_TAXI'
 
 geo_id_list = pd.read_csv(dataurl+'sz_speed.csv', header=None, nrows=1)
 geo_id_list = np.array(geo_id_list)[0]
@@ -71,9 +71,9 @@ config['dyna']['state'] = {'entity_id': 'geo_id', 'traffic_speed': 'num'}
 config['info'] = dict()
 config['info']['data_col'] = ['traffic_speed']
 config['info']['weight_col'] = 'link_weight'
-config['info']['data_files'] = ['SZ-TAXI']
-config['info']['geo_file'] = 'SZ-TAXI'
-config['info']['rel_file'] = 'SZ-TAXI'
+config['info']['data_files'] = ['SZ_TAXI']
+config['info']['geo_file'] = 'SZ_TAXI'
+config['info']['rel_file'] = 'SZ_TAXI'
 config['info']['output_dim'] = 1
 config['info']['time_intervals'] = 900
 config['info']['init_weight_inf_or_zero'] = 'inf'

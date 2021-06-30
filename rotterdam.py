@@ -17,11 +17,11 @@ def load_h5(filename, keywords):
     return data
 
 
-outputdir = 'output/Rotterdam'
+outputdir = 'output/ROTTERDAM'
 util.ensure_dir(outputdir)
 
 dataurl = 'input/Rotterdam/'
-dataname = outputdir + '/Rotterdam'
+dataname = outputdir + '/ROTTERDAM'
 
 geo = []
 for i in range(208):
@@ -106,8 +106,8 @@ config['dyna']['including_types'] = ['state']
 config['dyna']['state'] = {'entity_id': 'geo_id', 'traffic_speed': 'num'}
 config['info'] = dict()
 config['info']['data_col'] = 'traffic_speed'
-config['info']['data_files'] = ['Rotterdam']
-config['info']['geo_file'] = 'Rotterdam'
+config['info']['data_files'] = ['ROTTERDAM']
+config['info']['geo_file'] = 'ROTTERDAM'
 config['info']['output_dim'] = 1
 config['info']['time_intervals'] = 120
 config['info']['init_weight_inf_or_zero'] = 'inf'

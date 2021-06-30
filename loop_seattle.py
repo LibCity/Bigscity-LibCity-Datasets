@@ -4,13 +4,13 @@ import pandas as pd
 import numpy as np
 
 # 输出文件所在的目录
-output_dir = 'output/Loop Seattle'
+output_dir = 'output/LOOP_SEATTLE'
 util.ensure_dir(output_dir)
 
 #
 data_url = "input/Loop Seattle/Seattle_Loop_Dataset/"
 # 输出文件的前缀
-output_name = output_dir + "/Loop_Seattle"
+output_name = output_dir + "/LOOP_SEATTLE"
 
 dataset = pd.read_csv(data_url + "nodes_loop_mp_list.csv")
 id_set = set()
@@ -90,9 +90,9 @@ config['dyna']['state'] = {'entity_id': 'geo_id', 'traffic_speed': 'num'}
 config['info'] = dict()
 config['info']['data_col'] = ['traffic_speed']
 config['info']['weight_col'] = 'adj'
-config['info']['data_files'] = ['Loop Seattle']
-config['info']['geo_file'] = 'Loop Seattle'
-config['info']['rel_file'] = 'Loop Seattle'
+config['info']['data_files'] = ['LOOP_SEATTLE']
+config['info']['geo_file'] = 'LOOP_SEATTLE'
+config['info']['rel_file'] = 'LOOP_SEATTLE'
 config['info']['output_dim'] = 1
 config['info']['time_intervals'] = 300
 config['info']['init_weight_inf_or_zero'] = 'inf'
