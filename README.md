@@ -20,24 +20,24 @@
 | ROTTERDAM      | 208       | —         | —       | 4,813,536   | Rotterdam, Holland          | 135 days of 2018                 | 2min     |
 | SHMETRO        | 288       | 82,944    | —       | 1,934,208   | Shanghai, China             | Jul. 1, 2016 -   Sept. 30, 2016  | 15min    |
 | HZMETRO        | 80        | 6,400     | —       | 146,000     | Hangzhou, China             | Jan. 1, 2019 - Jan. 25, 2019     | 15min    |
-| TaxiBJ         | 32*32     | —         | —       | 5,652,480   | Beijing, China              | Mar. 1, 2015 -   Jun. 30, 2015   | 30min    |
-| T-Drive        | 32*32     | 1,048,576 | —       | 3,686,400   | Beijing, China              | Feb. 1, 2015 -   Jun. 30, 2015   | 60min    |
-| Porto          | 20*10     | —         | —       | 441,600     | Porto, Portugal             | Jul. 1, 2013 -   Sept. 30, 2013  | 60min    |
-| NYC-Taxi-Dyna  | 263       | 69,169    | —       | 574,392     | New York, USA               | Jan. 1, 2020 - Mar. 30, 2020     | 60min    |
-| NYC-Taxi-OD    | 263       | 69,169    | —       | 150,995,927 | New York, USA               | Apr. 1, 2020 - Jun. 30, 2020     | 60min    |
-| NYC-Taxi-Grid  | 10*20     | —         | —       | 432,000     | New York, USA               | Jan. 1, 2014 -   Mar. 31, 2014   | 60min    |
-| NYC-Bike       | 10*20     | —         | —       | 441,600     | New York, USA               | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
-| AustinRide     | 16*8      | —         | —       | 282,624     | Austin, USA                 | Jul. 1, 2016 -   Sept. 30, 2016  | 60min    |
-| BikeDC         | 16*8      | —         | —       | 282,624     | Washington, USA             | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
-| BikeCHI        | 15*18     | —         | —       | 670,680     | Chicago, USA                | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
-| Foursquare-TKY | 94,890    | —         | 11,589  | 1,112,156   | Tokyo, Japan                | Apr. 3, 2012 -   Sep. 16, 2013   | —        |
-| Foursquare-NYC | 64,735    | —         | 17,175  | 568,444     | New York, USA               | Apr. 3, 2012 -   Sep. 16, 2013   | —        |
+| TAXIBJ         | 32*32     | —         | —       | 5,652,480   | Beijing, China              | Mar. 1, 2015 -   Jun. 30, 2015   | 30min    |
+| T_DRIVE        | 32*32     | 1,048,576 | —       | 3,686,400   | Beijing, China              | Feb. 1, 2015 -   Jun. 30, 2015   | 60min    |
+| PORTO          | 20*10     | —         | —       | 441,600     | Porto, Portugal             | Jul. 1, 2013 -   Sept. 30, 2013  | 60min    |
+| NYCTAXI_DYNA   | 263       | 69,169    | —       | 574,392     | New York, USA               | Jan. 1, 2020 - Mar. 30, 2020     | 60min    |
+| NYCTAXI_OD     | 263       | 69,169    | —       | 150,995,927 | New York, USA               | Apr. 1, 2020 - Jun. 30, 2020     | 60min    |
+| NYCTAXI_GRID   | 10*20     | —         | —       | 432,000     | New York, USA               | Jan. 1, 2014 -   Mar. 31, 2014   | 60min    |
+| NYCBIKE        | 10*20     | —         | —       | 441,600     | New York, USA               | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
+| AUSTINRIDE     | 16*8      | —         | —       | 282,624     | Austin, USA                 | Jul. 1, 2016 -   Sept. 30, 2016  | 60min    |
+| BIKEDC         | 16*8      | —         | —       | 282,624     | Washington, USA             | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
+| BIKECHI        | 15*18     | —         | —       | 670,680     | Chicago, USA                | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
+| Foursquare_TKY | 94,890    | —         | 11,589  | 1,112,156   | Tokyo, Japan                | Apr. 3, 2012 -   Sep. 16, 2013   | —        |
+| Foursquare_NYC | 64,735    | —         | 17,175  | 568,444     | New York, USA               | Apr. 3, 2012 -   Sep. 16, 2013   | —        |
 | Gowalla        | 1,280,969 | 913,660   | 107,092 | 6,442,892   | Global                      | Feb. 4, 2009 -   Oct. 23, 2010   | —        |
 | BrightKite     | 772,966   | 394,334   | 51,406  | 4,747,287   | Global                      | Mar. 21, 2008 -   Oct. 18, 2010  | —        |
 | Instagram      | 13,187    | —         | 78,233  | 2,205,794   | New York, USA               | Jun. 15, 2011 -   Nov. 8, 2016   | —        |
 
 Note：
 
-- NYC-Taxi-Dyna is a dataset that counts the inflow and outflow of the region with an irregular area division method.
-- NYC-Taxi-OD is a dataset that counts the origin-destination flow between regions with an irregular area division method.
-- NYC-Taxi-Grid is a dataset that counts the inflow and outflow of the region with a grid-base division method.
+- NYCTAXI_DYNA is a dataset that counts the inflow and outflow of the region with an irregular area division method.
+- NYCTAXI_OD is a dataset that counts the origin-destination flow between regions with an irregular area division method.
+- NYCTAXI_GRID is a dataset that counts the inflow and outflow of the region with a grid-base division method.

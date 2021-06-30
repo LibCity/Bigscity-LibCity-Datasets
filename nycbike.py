@@ -1,221 +1,33 @@
 import numpy as np
 import pandas as pd
-import os
 import json
-import csv
+import os
 import math
 from datetime import datetime
 import time
-old_time_format = '%Y-%m-%d %H:%M:%S'
+old_time_format = '%Y-%m-%d %H:%M:%S.%f'
 new_time_format = '%Y-%m-%dT%H:%M:%SZ'
 
 
-def get_data_url_year(input_dir_flow, start_year, start_month, end_year, end_month):
-    res = []
-    pattern_year = input_dir_flow + "/%d-capitalbikeshare-tripdata.csv"
+def get_data_url(input_dir_flow, start_year, start_month, end_year, end_month):
+    pattern = input_dir_flow + "/%d%02d-citibike-tripdata.csv"
+    # pattern_JC = input_dir_flow + "/JC-%d%02d-citibike-tripdata.csv"
+
+    data_url = []
+
     i = start_year
     while i <= end_year:
-        res.append(pattern_year % i)
+        j = start_month if i == start_year else 1
+        end_j = end_month if i == end_year else 12
+
+        while j <= end_j:
+            data_url.append(pattern % (i, j))
+            # data_url.append(pattern_JC % (i, j))
+            j += 1
+
         i += 1
-    return res
 
-
-def get_data_url_Q(input_dir_flow, start_year, start_month, end_year, end_month):
-    res = []
-    pattern_Q = input_dir_flow + "/%dQ%d-capitalbikeshare-tripdata.csv"
-
-    start_Q = (start_month - 1) // 3 + 1
-    end_Q = (end_month - 1) // 3 + 1
-    year = start_year
-    while year <= end_year:
-        if year == start_year:
-            Q = start_Q
-        else:
-            Q = 1
-        if year == end_year:
-            end = end_Q
-        else:
-            end = 4
-        while Q <= end:
-            res.append(pattern_Q % (year, Q))
-            Q += 1
-        year += 1
-    return res
-
-
-def get_data_url_month(input_dir_flow, start_year, start_month, end_year, end_month):
-    res = []
-    pattern_month = input_dir_flow + "/%d%02d-capitalbikeshare-tripdata.csv"
-    pattern_201801 = input_dir_flow + "/%d%02d_capitalbikeshare_tripdata.csv"
-    year = start_year
-    while year <= end_year:
-        if year == start_year:
-            month = start_month
-        else:
-            month = 1
-        if year == end_year:
-            end = end_month
-        else:
-            end = 12
-        while month <= end:
-            if year == 2018 and month == 1:
-                res.append(pattern_201801 % (year, month))
-            else:
-                res.append(pattern_month % (year, month))
-            month += 1
-        year += 1
-    return res
-
-
-def get_data_url(input_dir_flow, start_year, start_month, end_year, end_month):
-    res = []
-    start_str = '%d-%02d' % (start_year, start_month)
-    end_str = '%d-%02d' % (end_year, end_month)
-    if start_str <= '2011-12':
-        if end_str <= '2011-12':
-            res += get_data_url_year(
-                input_dir_flow,
-                start_year,
-                start_month,
-                end_year,
-                end_month
-            )
-            return res
-        else:
-            res += get_data_url_year(
-                input_dir_flow,
-                start_year,
-                start_month,
-                2011,
-                12
-            )
-            start_year, start_month = 2021, 1
-            start_str = '%d-%02d' % (start_year, start_month)
-
-    if start_str <= '2017-12':
-        if end_str <= '2017-12':
-            res += get_data_url_Q(
-                input_dir_flow,
-                start_year,
-                start_month,
-                end_year,
-                end_month
-            )
-            return res
-        else:
-            res += get_data_url_Q(
-                input_dir_flow,
-                start_year,
-                start_month,
-                2017,
-                12
-            )
-            start_year, start_month = 2018, 1
-
-    res += get_data_url_month(
-        input_dir_flow,
-        start_year,
-        start_month,
-        end_year,
-        end_month
-    )
-    return res
-
-
-def gen_station_csv():
-    json_file_path = 'station_information/station_information.json'
-    csv_file_path = 'station_information/station_information.csv'
-
-    # 获得station_data
-    f = open(json_file_path, "r")
-    json_data = json.load(f)['data']
-    station_data = json_data['stations']
-
-    # 写入相关数据至csv文件
-    with open(csv_file_path, "w", newline="") as fw:
-        writer = csv.writer(fw)
-
-        # 先写入columns_name, 写入多行用writerows
-        writer.writerow(["name", "lon", "lat"])
-        for station in station_data:
-            lat = station['lat']
-            lon = station['lon']
-            name = station['name']
-            writer.writerow([name, lon, lat])
-
-
-def add_station_loc(data_set):
-    # 若含有起止站点坐标，选取相关列并改列名
-    if 'start_lat' in data_set.columns.values:
-        data_set = data_set[[
-            'started_at',
-            'ended_at',
-            'start_station_name',
-            'start_station_id',
-            'end_station_name',
-            'end_station_id',
-            'start_lat',
-            'start_lng',
-            'end_lat',
-            'end_lng',
-            'ride_id',
-        ]]
-        data_set = data_set.rename(columns={
-            'started_at': 'starttime',
-            'ended_at': 'stoptime',
-            'start_station_name': 'start station name',
-            'start_station_id': 'start station id',
-            'end_station_name': 'end station name',
-            'end_station_id': 'end station id',
-            'start_lat': 'start station latitude',
-            'start_lng': 'start station longitude',
-            'end_lat': 'end station latitude',
-            'end_lng': 'end station longitude',
-            'ride_id': 'bikeid',
-        })
-        data_set['bikeid'] = [i for i in range(data_set.shape[0])]
-        return data_set
-
-    # 若不含有起止站点坐标，则首先检查是否已生成station_information.csv
-    if not os.path.exists('station_information/station_information.csv'):
-        gen_station_csv()
-
-    # 确保已生成station_information.csv后，进行拼接操作
-    station_information = \
-        pd.read_csv('station_information/station_information.csv')
-    data_set = pd.merge(data_set, station_information,
-                        left_on='Start station',
-                        right_on='name')
-    data_set = data_set.rename(columns={
-        'Start date': 'starttime',
-        'End date': 'stoptime',
-        'Start station': 'start station name',
-        'Start station number': 'start station id',
-        'End station': 'end station name',
-        'End station number': 'end station id',
-        'lat': 'start station latitude',
-        'lon': 'start station longitude',
-        'Bike number': 'bikeid',
-    })
-    data_set = pd.merge(data_set, station_information,
-                        left_on='end station name',
-                        right_on='name')
-    data_set = data_set.rename(columns={
-        'lat': 'end station latitude',
-        'lon': 'end station longitude',
-    })
-    return data_set[['starttime',
-                     'stoptime',
-                     'start station name',
-                     'start station id',
-                     'end station name',
-                     'end station id',
-                     'start station latitude',
-                     'start station longitude',
-                     'end station latitude',
-                     'end station longitude',
-                     'bikeid',
-                     ]]
+    return data_url
 
 
 def handle_point_geo(df):
@@ -333,6 +145,14 @@ def convert_time(df):
     return df
 
 
+'''
+    df['time'], df['timestamp'] = zip(*df.apply(
+        lambda x: util.add_TZ(x["time_str"], with_timestamp=True),
+        axis=1
+    ))
+    '''
+
+
 def convert_to_trajectory(df):
     """
     :param df: all data
@@ -361,6 +181,36 @@ def judge_time_id(df, time_dividing_point):
     return df
 
 
+'''
+def gen_flow_data(trajectory, time_dividing_point):
+    """
+    :param trajectory:
+    :param time_dividing_point:
+    :return: ['time', 'row_id', 'column_id', 'inflow', 'outflow']
+    """
+    tra_groups = trajectory.groupby(by='time_id')
+    #print(tra_groups)
+    #print(len(time_dividing_point))
+    for tra_group, t in zip(tra_groups, time_dividing_point):
+        tra_group = tra_group[1]
+        flow_in = tra_group.groupby
+        (by=['row_id', 'column_id'])[['geo_id']].count().sort_index()
+        flow_in.columns = ['inflow']
+        flow_out = tra_group.groupby
+        (by=['prev_row_id', 'prev_column_id'])
+        [['prev_geo_id']].count().sort_index()
+        flow_out.index.names = ['row_id', 'column_id']
+        flow_out.columns = ['outflow']
+        flow = flow_in.join(flow_out, how='outer', on=['row_id', 'column_id'])
+        flow = flow.reset_index()
+        # flow['time'] = util.timestamp_to_str(t)
+        print(t)
+        flow['time'] = timestamp2str(t)
+        print(timestamp2str(t))
+        yield flow
+'''
+
+
 def gen_flow_data1(trajectory, time_dividing_point):
     """
     :param trajectory:
@@ -370,7 +220,6 @@ def gen_flow_data1(trajectory, time_dividing_point):
     trajectory = trajectory[
         (trajectory.prev_row_id != trajectory.row_id) |
         (trajectory.prev_column_id != trajectory.column_id)]
-
     tra_groups = trajectory.groupby(by='time_id')
     for tra_group in tra_groups:
         tra_group = tra_group[1]
@@ -419,7 +268,6 @@ def calculate_flow(
         trajectory_data, station_with_id, row_num, col_num, interval):
     # 对station_with_id选取相关列
     station_with_id = station_with_id[['s_id', 'row_id', 'column_id']]
-    station_with_id = station_with_id.drop_duplicates()
     # 对bike id进行group
     bike_trajectory = trajectory_data.groupby(by='bikeid')
     # print(bike_trajectory)
@@ -431,7 +279,6 @@ def calculate_flow(
         bike_trajectory['geo_id'] != bike_trajectory['prev_geo_id']]
     # bike_trajectory的列包括：,bikeid,geo_id,time,prev_geo_id
     # bike_trajectory.to_csv('output/NYC_BIKE_flow_test/NYC_BIKE_bike_traj.csv')
-
     # 表连接操作，suffixes同名列增加何种后缀加以区分
     bike_trajectory = pd.merge(bike_trajectory, station_with_id,
                                left_on='prev_geo_id',
@@ -488,7 +335,7 @@ def calculate_flow(
     return flow_data
 
 
-def dc_bike_flow(
+def nyc_bike_flow(
         output_dir, output_name, data_set, row_num, col_num, interval=3600):
     data_name = output_dir + "/" + output_name
     # geo data
@@ -505,7 +352,6 @@ def dc_bike_flow(
     station_rowcol = station_with_id[['s_id', 'row_id', 'column_id']]
     station_rowcol = station_rowcol.set_index(keys=['s_id'])
     # station_with_id.to_csv(data_name + 'station.geo', index=False)
-
     geo_data.to_csv(data_name + '.geo', index=False)
 
     print('finish geo')
@@ -516,6 +362,7 @@ def dc_bike_flow(
     trajectory_data = convert_to_trajectory(data_set)
     # trajectory_data.to_csv(data_name + 'trajectory_data.geo', index=False)
     print('finish trajectory')
+
     # flow data
     flow_data = calculate_flow(
         trajectory_data, station_with_id,
@@ -587,74 +434,65 @@ def gen_config(output_dir_flow, file_name, row_num, column_num, interval):
 if __name__ == '__main__':
     start_time = time.time()
     # 参数
-    # 时间间隔 s
+    # 时间间隔
     interval = 3600
-    # 开始年月日
+    # 开始年月
     (start_year, start_month, start_day) = (2020, 7, 1)
-    # 结束年月日
+    # 结束年月
     (end_year, end_month, end_day) = (2020, 9, 30)
     # 行数
-    row_num = 16
+    row_num = 10
     # 列数
-    column_num = 8
-    # 输入文件夹名称
-    input_dir_flow = 'input/BikeDC'
-    # 输出文件名称 与 输出文件夹名称
-    file_name = 'BIKEDC%d%02d-%d%02d' \
+    column_num = 20
+    # 输出文件名称 输出文件夹名称
+    file_name = 'NYCBIKE%d%02d-%d%02d' \
                 % (start_year, start_month, end_year, end_month)
-    output_dir_flow = 'output/BIKEDC%d%02d-%d%02d' \
+    output_dir_flow = 'output/NYCBIKE%d%02d-%d%02d' \
                       % (start_year, start_month, end_year, end_month)
-    # 创建输出文件夹
-    if not os.path.exists(output_dir_flow):
-        os.makedirs(output_dir_flow)
-
-    # 待处理的数据文件名
+    # 输入文件夹名称
+    input_dir_flow = 'input/NYC-Bike'
+    # 生成待处理的数据文件名
     data_url = get_data_url(input_dir_flow=input_dir_flow,
                             start_year=start_year,
                             start_month=start_month,
                             end_year=end_year,
                             end_month=end_month
                             )
+    data_url = tuple(data_url)
     print(data_url)
-    # 读入csv文件并实现拼接
-    data_set_dc = pd.concat(
-        map(lambda x: add_station_loc(pd.read_csv(x)), data_url), axis=0
-    )  # 纵向拼接数据
-    data_set_dc.reset_index(drop=True, inplace=True)
-    print('finish read csv')
+    # 创建输出文件夹
+    if not os.path.exists(output_dir_flow):
+        os.makedirs(output_dir_flow)
 
-    data_set_dc = data_set_dc.dropna(axis=0, subset=['start station latitude',
-                                                     'start station longitude',
-                                                     'end station latitude',
-                                                     'end station longitude',
-                                                     'start station name',
-                                                     'start station id',
-                                                     'end station name',
-                                                     'end station id'
-                                                     ])
+    # 读入csv文件并实现拼接
+    dataset_nyc = pd.concat(
+        map(lambda x: pd.read_csv(x), data_url), axis=0
+    )  # 纵向拼接数据
+    dataset_nyc.reset_index(drop=True, inplace=True)
+    print('finish read csv')
 
     # 过滤不属于时间范围内的记录
     start_str = '%d-%02d-%02d' % (start_year, start_month, start_day)
     end_str = '%d-%02d-%02d' % (end_year, end_month, end_day)
 
-    data_set_dc = data_set_dc.loc[
-        data_set_dc['starttime'].apply(
+    dataset_nyc = dataset_nyc.loc[
+        dataset_nyc['starttime'].apply(
             lambda x: end_str >= x.split(" ")[0] >= start_str)]
-    data_set_dc = data_set_dc.loc[
-        data_set_dc['stoptime'].apply(
+    dataset_nyc = dataset_nyc.loc[
+        dataset_nyc['stoptime'].apply(
             lambda x: end_str >= x.split(" ")[0] >= start_str)]
-
     # 调用处理函数，生成.grid 和.geo文件
-    dc_bike_flow(
+    nyc_bike_flow(
         output_dir_flow,
         file_name,
-        data_set_dc,
+        dataset_nyc,
         row_num,
         column_num,
         interval=interval
     )
+    print('finish')
+
     # 生成config.json文件
     gen_config(output_dir_flow, file_name, row_num, column_num, interval)
-    print('finish')
     end_time = time.time()
     print(end_time - start_time)

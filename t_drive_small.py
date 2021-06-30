@@ -347,9 +347,9 @@ if __name__ == '__main__':
     # 列数
     column_num = 32
     # 输出文件名称
-    file_name = 'T-Drive%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    file_name = 'T_DRIVE_Small'
     # 输出文件夹名称
-    output_dir_flow = 'output/T-Drive%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    output_dir_flow = 'output/T_DRIVE_Small'
     # 输入文件夹名称
     input_dir_flow = 'input/T-Drive'
 

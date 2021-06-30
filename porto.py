@@ -111,9 +111,9 @@ if __name__ == '__main__':
     input_file_name = 'Porto.csv'
     # input_file_name = 'train.csv'
     # 输出文件名称
-    file_name = 'Porto%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    file_name = 'PORTO%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
     # 输出文件夹名称
-    output_dir_flow = 'output/Porto%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
+    output_dir_flow = 'output/PORTO%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
     # 输入文件夹名称
     input_dir_flow = 'input/Porto/'
 

@@ -16,11 +16,11 @@ def load_h5(filename, keywords):
     return data
 
 
-outputdir = 'output/T-Drive20150206'
+outputdir = 'output/T_DRIVE20150206'
 util.ensure_dir(outputdir)
 
 dataurl = 'input/T-Drive20150206/'
-dataname = outputdir + '/T-Drive20150206'
+dataname = outputdir + '/T_DRIVE20150206'
 
 x0, y0 = 116.25, 39.83
 x1, y1 = 116.64, 40.12
@@ -96,9 +96,9 @@ config['grid']['including_types'] = ['state']
 config['grid']['state'] = {'row_id': 32, 'column_id': 32, 'inflow': 'num', 'outflow': 'num'}
 config['info'] = dict()
 config['info']['data_col'] = ['inflow', 'outflow']
-config['info']['data_files'] = ['T-Drive20150206']
-config['info']['geo_file'] = 'T-Drive20150206'
-config['info']['rel_file'] = 'T-Drive20150206'
+config['info']['data_files'] = ['T_DRIVE20150206']
+config['info']['geo_file'] = 'T_DRIVE20150206'
+config['info']['rel_file'] = 'T_DRIVE20150206'
 config['info']['output_dim'] = 2
 config['info']['time_intervals'] = 3600
 config['info']['init_weight_inf_or_zero'] = 'inf'

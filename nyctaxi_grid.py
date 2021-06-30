@@ -324,7 +324,7 @@ if __name__ == '__main__':
     column_num = 20
 
     file_name = 'NYCTAXI%d%02d-%d%02d' % (start_year, start_month, end_year, end_month)
-    output_dir_flow = 'output/NYCTAXI%d%02d-%d%02d_grid' % (start_year, start_month, end_year, end_month)
+    output_dir_flow = 'output/NYCTAXI%d%02d-%d%02d_GRID' % (start_year, start_month, end_year, end_month)
     input_dir_flow = 'input/NYC-Taxi'
     data_url = get_data_url(input_dir_flow=input_dir_flow,
                             start_year=start_year,
