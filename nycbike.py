@@ -1,3 +1,4 @@
+# link: https://www.citibikenyc.com/system-data
 import numpy as np
 import pandas as pd
 import json

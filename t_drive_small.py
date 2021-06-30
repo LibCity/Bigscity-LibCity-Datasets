@@ -1,3 +1,4 @@
+# link: https://www.microsoft.com/en-us/research/publication/t-drive-trajectory-data-sample/
 import json
 import pandas as pd
 import os
@@ -347,9 +348,9 @@ if __name__ == '__main__':
     # 列数
     column_num = 32
     # 输出文件名称
-    file_name = 'T_DRIVE_Small'
+    file_name = 'T_DRIVE_SMALL'
     # 输出文件夹名称
-    output_dir_flow = 'output/T_DRIVE_Small'
+    output_dir_flow = 'output/T_DRIVE_SMALL'
     # 输入文件夹名称
     input_dir_flow = 'input/T-Drive'
 

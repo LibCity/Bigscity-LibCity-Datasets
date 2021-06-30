@@ -1,6 +1,18 @@
 # Dataset in LibTraffic
 
+This repository is used to introduce the dataset in LibTraffic.
+
+## Dataset Conversion Tools
+
+The dataset used in LibTraffic is stored in a unified data storage format named [atomic files](https://bigscity-libtraffic-docs.readthedocs.io/en/latest/user_guide/data/atomic_files.html). In order to directly use [the datasets we collected](https://bigscity-libtraffic-docs.readthedocs.io/en/latest/user_guide/data/raw_data.html) in LibTraffic, we have converted all datasets into the format of atomic files, and provide the conversion tools in this repository.
+
+All conversion tools take the original dataset in the `./input/` directory as input, and output the converted atomic files to the `./output/` directory. In addition, we provide a link to obtain the original dataset in the first line of each conversion tool. You can download the original dataset through this link and place it in the `./input/` directory. Imitating our conversion tools, you can easily convert your own traffic dataset to adapt it to LibTraffic.
+
+Besides, you can simply download the datasets we have processed, the data link is [BaiduDisk with code 1231](https://pan.baidu.com/s/1qEfcXBO-QwZfiT0G3IYMpQ) or [Google Drive](https://drive.google.com/drive/folders/1g5v2Gq1tkOq8XO0HDCZ9nOTtRpB6-gPe?usp=sharing).
+
 ## Dataset Statistics Infomation
+
+Here we present the statistics of the  datasets we have processed.
 
 | DATASET        | #GEO      | #REL      | #USR    | #DYNA       | PLACE                       | DURATION                         | INTERVAL |
 | -------------- | --------- | --------- | ------- | ----------- | --------------------------- | -------------------------------- | -------- |
