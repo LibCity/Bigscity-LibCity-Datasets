@@ -1,3 +1,4 @@
+#link: http://research.microsoft.com/en-us/projects/geolife/default.aspx
 import os
 import pandas as pd
 from datetime import datetime
@@ -6,9 +7,11 @@ geo-life 被拆分成两个表
 usr: 只包含所有 usr_id
 dyna: dyna_id, type, time, entity_id, location(coordinate), altitude(feet), traj_id, transportation_mode 
 '''
-
+output_folder = './output'
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
 path = os.getcwd()
-data_path = os.path.join(path, 'data')
+data_path = os.path.join(path, './input/data')
 
 usr_set = os.listdir(data_path)
 usr_set.sort()
@@ -82,6 +85,6 @@ for uid in usr_set:
 dyna = dyna.reset_index(drop=True)
 dyna['dyna_id'] = dyna.index
 dyna = dyna.reindex(columns=['dyna_id', 'type', 'time', 'entity_id', 'location', 'altitude', 'traj_id', 'transportation_mode'])
-dyna.to_csv('./geo_life.dyna', index=False)
+dyna.to_csv(output_folder + '/geo_life.dyna', index=False)
 usr = pd.DataFrame(usr, columns=['usr_id'])
-usr.to_csv('./geo_life.usr', index=False)
+usr.to_csv(output_folder + '/geo_life.usr', index=False)
