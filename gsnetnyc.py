@@ -7,7 +7,7 @@ import util
 import sys
 
 
-dataurl, outputdir, prefix = 'input/GSNetNY', 'output/GSNetNY', 'output/GSNetNY/GSNetNY'
+dataurl, outputdir, prefix = 'input/GSNetNYC', 'output/GSNetNYC', 'output/GSNetNYC/GSNetNYC'
 util.ensure_dir(dataurl)
 util.ensure_dir(outputdir)
 
@@ -202,7 +202,7 @@ def write_config() -> None:
         },
         'info': {
             'data_col': dyna_columns[5:],
-            'data_files': ['GSNetNY'],
+            'data_files': ['GSNetNYC'],
             'graph_input_col': [
                 'risk',
                 'inflow',
@@ -211,9 +211,9 @@ def write_config() -> None:
             'target_time_col': [
                 'holiday'
             ],
-            'geo_file': 'GSNetNY',
-            'rel_file': 'GSNetNY',
-            'grid_file': 'GSNetNY',
+            'geo_file': 'GSNetNYC',
+            'rel_file': 'GSNetNYC',
+            'grid_file': 'GSNetNYC',
             'load_external': True,
             'output_dim': 1,
             'time_intervals': 3600,
