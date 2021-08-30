@@ -65,7 +65,6 @@ def write_rel() -> None:
                 rel_type,
                 i,
                 j,
-                1,  # adjs['risk_mask'][i][j],
                 adjs['road_adj'][i][j],
                 adjs['risk_adj'][i][j],
                 adjs['poi_adj'][i][j]
@@ -80,7 +79,7 @@ def write_rel() -> None:
 
 
 def write_dyna() -> None:
-    dyna_file = open(prefix + '.dyna', 'w')
+    dyna_file = open(prefix + '.grid', 'w')
 
     with open(dataurl + '/nyc/all_data.pkl', 'rb') as f:
         ad = pickle.load(f)
@@ -134,9 +133,9 @@ def write_dyna() -> None:
     dyna_file.close()
 
 
-def write_grid():
+def write_dyna2():
     # actually effectively a .rel file
-    grid_file = open(prefix + '.grid', 'w')
+    grid_file = open(prefix + '.dyna', 'w')
 
     grid_file.write(','.join(grid_columns))
     grid_file.write('\n')
@@ -156,7 +155,7 @@ def write_grid():
                     '1970-01-01T00:00:00Z',  # dummy
                     i,
                     j,
-                    maps['risk_mask'][i][j],
+                    maps['risk_mask'][j][i],
                     # column first; embeds ndarray of shape (row_count, column_count, graph_node_count)
                     # avoids nightmarish eval()
                     '\"' + ' '.join(map(str, maps['grid_node_map'][j * row_count + i, :].tolist())) + '\"'
@@ -213,7 +212,8 @@ def write_config() -> None:
             ],
             'geo_file': 'GSNetNYC',
             'rel_file': 'GSNetNYC',
-            'grid_file': 'GSNetNYC',
+            'grid_len_row': row_count,
+            'grid_len_column': column_count,
             'load_external': True,
             'output_dim': 1,
             'time_intervals': 3600,
@@ -243,5 +243,5 @@ if __name__ == '__main__':
     write_geo()
     write_rel()
     write_dyna()
-    write_grid()
+    write_dyna2()
     write_config()
