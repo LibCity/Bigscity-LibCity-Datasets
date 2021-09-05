@@ -3,19 +3,20 @@ import re
 import os
 import json
 
-network = trackInfo = geo = rel = dyna = usr = None
+network = trackInfo = truth = geo = rel = dyna = usr = route = None
 
-def processGeoAndRel():
-    geo.write("geo_id, type, coordinate, speed\n")
+
+def processGeoAndRelAndRoute():
+    geo.write("geo_id, type, coordinate\n")
     rel.write("rel_id,type,origin_id,destination_id\n")
     network.readline()
     line = network.readline()
     nodeInfo = re.search("\(.+\)", line)
     j = 0
     currentSum = 0
-    while nodeInfo != None:
+    dic = {}
+    while nodeInfo is not None:
         flag = line.split('\t')[3]
-        speed = line.split('\t')[4]
         nodes = nodeInfo[0].replace('(', '').replace(')', '').split(', ')
         i = 0
         while i < len(nodes):
@@ -24,6 +25,10 @@ def processGeoAndRel():
             geo.write(str(j) + ',Point,"[' + node1 + ',' + node2 + ']"\n')
             if i != len(nodes) - 1:
                 rel.write(str(currentSum) + ',geo,' + str(j) + ',' + str(j + 1) + '\n')
+                if line.split('\t')[0] in dic.keys():
+                    dic[line.split('\t')[0]].append(currentSum)
+                else:
+                    dic[line.split('\t')[0]] = [currentSum]
                 currentSum += 1
                 if flag == '1':
                     rel.write(str(currentSum) + ',geo,' + str(j + 1) + ',' + str(j) + '\n')
@@ -34,7 +39,6 @@ def processGeoAndRel():
         nodeInfo = re.search("\(.+\)", line)
     nodeNum = j
 
-
     trackInfo.readline()
     nodeInfo = re.split('\t| ', trackInfo.readline())
     while len(nodeInfo) == 6:
@@ -43,11 +47,31 @@ def processGeoAndRel():
         geo.write(str(j) + ',Point,"[' + node1 + ',' + node2 + ']"\n')
         j += 1
         nodeInfo = re.split('\t| ', trackInfo.readline())
+
+    route.write("rel_id\n")
+    truth.readline()
+    truth_info = truth.readline()
+    while truth_info != '':
+        edge_id = truth_info.split("\t")[0]
+        traversed = truth_info.split("\t")[1].replace('\n', '')
+        if traversed == '1':
+            i = 0
+            while i < len(dic[edge_id]):
+                route.write(str(dic[edge_id][i]) + '\n')
+                i += 1
+        else:
+            i = len(dic[edge_id]) - 1
+            while i >= 0:
+                route.write(str(dic[edge_id][i]) + '\n')
+                i -= 1
+        truth_info = truth.readline()
     return nodeNum
+
 
 def processUsr():
     usr.write("usr_id\n")
     usr.write("0")
+
 
 def processDyna(nodeNum):
     dyna.write("dyna_id,type,time,entity_id,location\n")
@@ -61,6 +85,7 @@ def processDyna(nodeNum):
         dyna.write(str(i) + ',trajectory,' + time + ',0,' + str(i + nodeNum) + '\n')
         i += 1
         nodeInfo = re.split('\t| ', trackInfo.readline())
+
 
 def processConfig():
     config = dict()
@@ -78,11 +103,13 @@ def processConfig():
     config['info'] = dict()
     json.dump(config, open('config.json', 'w', encoding='utf-8'), ensure_ascii=False)
 
+
 def openFile():
-    global network, trackInfo, geo, rel, dyna, usr
+    global network, trackInfo, truth, geo, rel, dyna, usr, route
     os.chdir("input")
     network = open("road_network.txt", "r")
     trackInfo = open("gps_data.txt", "r")
+    truth = open("ground_truth_route.txt", "r")
     os.chdir(os.path.dirname(os.getcwd()))
     outputPath = os.getcwd() + "\\" + "output"
     if os.path.exists(outputPath):
@@ -93,24 +120,29 @@ def openFile():
     rel = open("Seattle.rel", "w")
     dyna = open("Seattle.dyna", "w")
     usr = open("Seattle.usr", "w")
+    route = open("Seattle.route", "w")
+
 
 def closeFile():
-    global network, trackInfo, geo, rel, dyna, usr
+    global network, trackInfo, truth, geo, rel, dyna, usr, route
     network.close()
     trackInfo.close()
+    truth.close()
     geo.close()
     rel.close()
     dyna.close()
     usr.close()
+    route.close()
+
 
 def dataTransform():
     openFile()
-    nodeNum = processGeoAndRel()
+    nodeNum = processGeoAndRelAndRoute()
     processUsr()
     processDyna(nodeNum)
     processConfig()
     closeFile()
 
+
 if __name__ == '__main__':
     dataTransform()
-
