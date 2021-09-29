@@ -41,6 +41,16 @@ def find_useful_features(feature_list, json_obj):
     return res
 
 
+def get_highway_to_num(json_obj, feature='highway'):
+    res = dict()
+    i = 0
+    for line in json_obj:
+        if str(line['properties'][feature]) not in res.keys():
+            res[str(line['properties'][feature])] = i
+            i += 1
+    return res
+
+
 def main(file_name):
     file = json.load(open('./data/edges.json', 'r', encoding='utf-8'))
     features = file['features']
@@ -48,7 +58,8 @@ def main(file_name):
     # check
     # check_fid(features)  # fid 可以直接作为geo_id
     # check_uv(features)  # 并没有什么毛病...
-    check_all_values(features, "highway")
+    check_all_values(features, "lanes")
+    highway2num = get_highway_to_num(features, "highway")
 
     # 2 files
     geo_file = open('./data/' + file_name + '.geo', 'w')
@@ -72,11 +83,14 @@ def main(file_name):
         geo_file.write(str(geo_id) + ',' + type + ',"' + str(coordinates) + '"')
         for feature in feature_list:
             if feature == 'highway':
-                geo_file.write(',' + str(properties[feature]))  # no none
+                geo_file.write(',' + str(highway2num[str(properties[feature])]))  # no none
             elif feature == 'length':
                 geo_file.write(',' + ('0' if properties[feature] is None else str(properties[feature])))
             elif feature == 'lanes':
-                geo_file.write(',' + ('0' if properties[feature] is None else str(properties[feature])))
+                if properties[feature] is None:
+                    geo_file.write(',' + '0')
+                else:
+                    geo_file.write(',' + ('0' if properties[feature] is None else str(properties[feature][0])))
             elif feature == 'tunnel':
                 geo_file.write(',' + ('0' if properties[feature] is None else '1'))
             elif feature == 'bridge':
@@ -118,7 +132,11 @@ def main(file_name):
                 for b in out_list:
                     rel_file.write(str(i) + ',geo,' + str(a) + ',' + str(b) + '\n')
                     i += 1
+    json.dump(highway2num, open('./data/highway2num.json', 'w'))
 
 
 if __name__ == '__main__':
     main('BJ_roadmap')
+    # import pandas as pd
+    # a = pd.read_csv('./data/BJ_roadmap.rel')
+    # print(a)
