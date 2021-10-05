@@ -1,4 +1,6 @@
+# link: Please contact the author!
 import json
+import util
 
 
 def check_all_values(json_obj, feature):
@@ -41,6 +43,30 @@ def find_useful_features(feature_list, json_obj):
     return res
 
 
+def processConfig():
+    config = dict()
+    config['geo'] = dict()
+    config['geo']['including_types'] = ['LineString']
+    config['geo']['LineString'] = {}
+    config['geo']['LineString']['highway'] = 'num'
+    config['geo']['LineString']['length'] = 'num'
+    config['geo']['LineString']['lanes'] = 'num'
+    config['geo']['LineString']['tunnel'] = 'num'
+    config['geo']['LineString']['bridge'] = 'num'
+    config['geo']['LineString']['maxspeed'] = 'num'
+    config['geo']['LineString']['width'] = 'num'
+    config['geo']['LineString']['service'] = 'num'
+    config['geo']['LineString']['junction'] = 'num'
+    config['geo']['LineString']['key'] = 'num'
+    config['rel'] = dict()
+    config['rel']['including_types'] = ['geo']
+    config['rel']['geo'] = {}
+    config['info'] = dict()
+    config['info']['geo_file'] = 'BJ_roadmap'
+    config['info']['rel_file'] = 'BJ_roadmap'
+    json.dump(config, open('./output/BJ_roadmap/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
+
+
 def get_highway_to_num(json_obj, feature='highway'):
     res = dict()
     i = 0
@@ -52,7 +78,7 @@ def get_highway_to_num(json_obj, feature='highway'):
 
 
 def main(file_name):
-    file = json.load(open('./data/edges.json', 'r', encoding='utf-8'))
+    file = json.load(open('./input/BJ_roadmap/edges.json', 'r', encoding='utf-8'))
     features = file['features']
 
     # check
@@ -62,8 +88,8 @@ def main(file_name):
     highway2num = get_highway_to_num(features, "highway")
 
     # 2 files
-    geo_file = open('./data/' + file_name + '.geo', 'w')
-    rel_file = open('./data/' + file_name + '.rel', 'w')
+    geo_file = open('./output/BJ_roadmap/' + file_name + '.geo', 'w')
+    rel_file = open('./output/BJ_roadmap/' + file_name + '.rel', 'w')
 
     # feature_list
     feature_list = ["highway", "length", "lanes", "tunnel", "bridge", "maxspeed", "width", "service", "junction", "key"]
@@ -132,11 +158,15 @@ def main(file_name):
                 for b in out_list:
                     rel_file.write(str(i) + ',geo,' + str(a) + ',' + str(b) + '\n')
                     i += 1
-    json.dump(highway2num, open('./data/highway2num.json', 'w'))
+    json.dump(highway2num, open('./output/BJ_roadmap/highway2num.json', 'w'))
+
+    processConfig()
 
 
 if __name__ == '__main__':
+    outputdir = './output/BJ_roadmap'
+    util.ensure_dir(outputdir)
     main('BJ_roadmap')
     # import pandas as pd
-    # a = pd.read_csv('./data/BJ_roadmap.rel')
+    # a = pd.read_csv('./output/BJ_roadmap/BJ_roadmap.rel')
     # print(a)
