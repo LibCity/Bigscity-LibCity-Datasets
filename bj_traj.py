@@ -1,27 +1,29 @@
 import pickle
 import csv
 import os
-from util import int_to_isoformat
+from util import int_to_isoformat, ensure_dir
 
 geo_cnt = 0
 
 
-def get_dyna(name):
-    f = open(os.path.join("input", name), "rb")
+def get_dyna(f, name):
     x = pickle.load(f)
 
+    output_dir = os.path.join("output", name)
+    ensure_dir(output_dir)
+
     dyna_cnt = 0
-    dyna_file = open(os.path.join("output", name + ".dyna"), "w", newline='')
+    dyna_file = open(os.path.join(output_dir, name + ".dyna"), "w", newline='')
     dyna_writer = csv.writer(dyna_file)
     dyna_writer.writerow(["dyna_id", "type", "time", "entity_id", "location"])
 
     geo_cnt = 0
     geos = {}
-    geo_file = open(os.path.join("output", name + ".geo"), "w", newline='')
+    geo_file = open(os.path.join(output_dir, name + ".geo"), "w", newline='')
     geo_writer = csv.writer(geo_file)
     geo_writer.writerow(["geo_id", "type", "coordinates"])
 
-    usr_file = open(os.path.join("output", name + ".usr"), "w", newline='')
+    usr_file = open(os.path.join(output_dir, name + ".usr"), "w", newline='')
     usr_writer = csv.writer(usr_file)
     usr_writer.writerow(["usr_id"])
 
@@ -54,8 +56,13 @@ def convert(x):
     return str(x)
 
 
+DATA_NAME = "bj_traj"
 month = 6
 for day in range(1, 32):
-    file_name = "gps_2015" + convert(month) + convert(day)
-    if os.path.exists(os.path.join("input", file_name)):
-        get_dyna(file_name)
+    time = "2015" + convert(month) + convert(day)
+    file_name = "gps_" + time
+    input_dirname = os.path.join("input", DATA_NAME)
+    input_filename = os.path.join(input_dirname, file_name)
+    if os.path.exists(input_filename):
+        file = open(input_filename, "rb")
+        get_dyna(file, DATA_NAME + "_" + time)

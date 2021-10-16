@@ -2,7 +2,7 @@ from zipfile import ZipFile
 import re
 import os
 import csv
-from util import int_to_isoformat
+from util import int_to_isoformat, ensure_dir
 
 pattern = re.compile(r"(\S+),(\S+),\"\[(.+)]\"\n")
 detail_pattern = re.compile(r"(\S+) (\S+) (\S+), ")
@@ -12,20 +12,23 @@ geo_cnt = 0
 def get_dyna(file, name, binary):
     wrong_columns = []
 
+    output_dir = os.path.join("output", name)
+    ensure_dir(output_dir)
+
     dyna_cnt = 0
-    dyna_file = open(os.path.join("output", name + ".dyna"), "w", newline='')
+    dyna_file = open(os.path.join(output_dir, name + ".dyna"), "w", newline='')
     dyna_writer = csv.writer(dyna_file)
     dyna_writer.writerow(["dyna_id", "type", "time", "entity_id", "traj_id", "location"])
 
     geo_cnt = 0
     geos = {}
-    geo_file = open(os.path.join("output", name + ".geo"), "w", newline='')
+    geo_file = open(os.path.join(output_dir, name + ".geo"), "w", newline='')
     geo_writer = csv.writer(geo_file)
     geo_writer.writerow(["geo_id", "type", "coordinates"])
 
     ids = {}
     cur_id = 0
-    usr_file = open(os.path.join("output", name + ".usr"), "w", newline='')
+    usr_file = open(os.path.join(output_dir, name + ".usr"), "w", newline='')
     usr_writer = csv.writer(usr_file)
     usr_writer.writerow(["usr_id"])
 
@@ -75,13 +78,16 @@ def get_dyna(file, name, binary):
     print()
 
 
-filenames = ["chengdushi_1101_1110", "chengdushi_1110_1120", "chengdushi_1120_1130"]
-for filename in filenames:
-    f = None
-    if os.path.exists(os.path.join("input", filename + ".zip")):
-        myzip = ZipFile(os.path.join("input", filename + ".zip"))
-        f = myzip.open(filename + ".csv")
-        get_dyna(f, filename, binary=True)
-    elif os.path.exists(os.path.join("input", filename + ".csv")):
-        f = open(os.path.join("input", filename + ".csv"))
-        get_dyna(f, filename, binary=False)
+def get_dynas(filenames, DATA_NAME="cd_traj"):
+    for filename in filenames:
+        input_dir = os.path.join("input", DATA_NAME)
+        if os.path.exists(os.path.join(input_dir, filename + ".zip")):
+            myzip = ZipFile(os.path.join(input_dir, filename + ".zip"))
+            f = myzip.open(filename + ".csv")
+            get_dyna(f, DATA_NAME + "_" + filename, binary=True)
+        elif os.path.exists(os.path.join(input_dir, filename + ".csv")):
+            f = open(os.path.join(input_dir, filename + ".csv"))
+            get_dyna(f, DATA_NAME + "_" + filename, binary=False)
+
+
+get_dynas(["chengdushi_1101_1110", "chengdushi_1110_1120", "chengdushi_1120_1130"], "cd_traj")
