@@ -1,6 +1,7 @@
 # link: https://zenodo.org/record/57731#.YSJRbGczZPZ
 import os
 import json
+from util import ensure_dir
 
 arcs = nodes = track = geo = dyna = rel = usr = route_unprocessed = route_processed = None
 
@@ -54,14 +55,16 @@ def processDyna(nodeNum):
 
 
 def processRoute():
-    route_processed.write("rel_id\n")
+    route_processed.write("route_id,usr_id,rel_id\n")
     line = route_unprocessed.readline()
+    route_id = 0
     while line != "":
-        route_processed.write(line)
+        route_processed.write(str(route_id) + ',0,' + line)
+        route_id += 1
         line = route_unprocessed.readline()
 
 
-def processConfig():
+def processConfig(name):
     config = dict()
     config['geo'] = dict()
     config['geo']['including_types'] = ['Point']
@@ -76,36 +79,26 @@ def processConfig():
     config['dyna']['trajectory'] = {'entity_id': 'usr_id', 'location': 'geo_id'}
     config['info'] = dict()
     config['info']['with_time'] = False
-    json.dump(config, open('config.json', 'w', encoding='utf-8'), ensure_ascii=False)
+    json.dump(config, open(os.path.join('output', 'global', name, 'config.json'), 'w', encoding='utf-8'),
+              ensure_ascii=False, indent=4)
 
 
 def openFile(name):
     global arcs, nodes, track, geo, dyna, rel, usr, config, route_unprocessed, route_processed
-    os.chdir("input")
-    os.chdir(name)
-    arcs = open(name + ".arcs", "r")
-    nodes = open(name + ".nodes", "r")
-    track = open(name + ".track", "r")
-    route_unprocessed = open(name + ".route", "r")
-    os.chdir(os.path.dirname(os.getcwd()))
-    os.chdir(os.path.dirname(os.getcwd()))
-    outputPath = os.getcwd() + "\\" + "output"
-    outputFilePath = outputPath + "\\" + name
-    if os.path.exists(outputPath):
-        os.chdir(outputPath)
-    else:
-        os.mkdir(outputPath)
-        os.chdir(outputPath)
-    if os.path.exists(outputFilePath):
-        os.chdir(outputFilePath)
-    else:
-        os.mkdir(outputFilePath)
-        os.chdir(outputFilePath)
-    geo = open(name + ".geo", "w")
-    dyna = open(name + ".dyna", "w")
-    rel = open(name + ".rel", "w")
-    usr = open(name + ".usr", "w")
-    route_processed = open(name + ".route", "w")
+
+    input_path = os.path.join('input', 'global', name)
+    arcs = open(os.path.join(input_path, name + ".arcs"), "r")
+    nodes = open(os.path.join(input_path, name + ".nodes"), "r")
+    track = open(os.path.join(input_path, name + ".track"), "r")
+    route_unprocessed = open(os.path.join(input_path, name + ".route"), "r")
+
+    output_path = os.path.join('output', 'global', name)
+    ensure_dir(output_path)
+    geo = open(os.path.join(output_path, name + ".geo"), "w")
+    dyna = open(os.path.join(output_path, name + ".dyna"), "w")
+    rel = open(os.path.join(output_path, name + ".rel"), "w")
+    usr = open(os.path.join(output_path, name + ".usr"), "w")
+    route_processed = open(os.path.join(output_path, name + ".route"), "w")
 
 
 def closeFile():
@@ -119,8 +112,6 @@ def closeFile():
     usr.close()
     route_unprocessed.close()
     route_processed.close()
-    os.chdir(os.path.dirname(os.getcwd()))
-    os.chdir(os.path.dirname(os.getcwd()))
 
 
 def dataTransform(name):
@@ -130,7 +121,7 @@ def dataTransform(name):
     processRel()
     processDyna(nodeNum)
     processRoute()
-    processConfig()
+    processConfig(name)
     closeFile()
 
 

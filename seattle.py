@@ -2,7 +2,7 @@
 import re
 import os
 import json
-
+from util import ensure_dir
 network = trackInfo = truth = geo = rel = dyna = usr = route = None
 
 
@@ -11,7 +11,7 @@ def processGeoAndRelAndRoute():
     rel.write("rel_id,type,origin_id,destination_id\n")
     network.readline()
     line = network.readline()
-    nodeInfo = re.search("\(.+\)", line)
+    nodeInfo = re.search("\\(.+\\)", line)
     j = 0
     currentSum = 0
     dic = {}
@@ -36,7 +36,7 @@ def processGeoAndRelAndRoute():
             i += 1
             j += 1
         line = network.readline()
-        nodeInfo = re.search("\(.+\)", line)
+        nodeInfo = re.search("\\(.+\\)", line)
     nodeNum = j
 
     trackInfo.readline()
@@ -48,21 +48,24 @@ def processGeoAndRelAndRoute():
         j += 1
         nodeInfo = re.split('\t| ', trackInfo.readline())
 
-    route.write("rel_id\n")
+    route.write("route_id,usr_id,rel_id\n")
     truth.readline()
     truth_info = truth.readline()
+    route_id = 0
     while truth_info != '':
         edge_id = truth_info.split("\t")[0]
         traversed = truth_info.split("\t")[1].replace('\n', '')
         if traversed == '1':
             i = 0
             while i < len(dic[edge_id]):
-                route.write(str(dic[edge_id][i]) + '\n')
+                route.write(str(route_id) + ',0,' + str(dic[edge_id][i]) + '\n')
+                route_id += 1
                 i += 1
         else:
             i = len(dic[edge_id]) - 1
             while i >= 0:
-                route.write(str(dic[edge_id][i]) + '\n')
+                route.write(str(route_id) + ',0,' + str(dic[edge_id][i]) + '\n')
+                route_id += 1
                 i -= 1
         truth_info = truth.readline()
     return nodeNum
@@ -101,26 +104,25 @@ def processConfig():
     config['dyna']['including_types'] = ['trajectory']
     config['dyna']['trajectory'] = {'entity_id': 'usr_id', 'location': 'geo_id'}
     config['info'] = dict()
-    json.dump(config, open('config.json', 'w', encoding='utf-8'), ensure_ascii=False)
+    json.dump(config, open('output/Seattle/config.json', 'w', encoding='utf-8'),
+              ensure_ascii=False, indent=4)
 
 
 def openFile():
     global network, trackInfo, truth, geo, rel, dyna, usr, route
-    os.chdir("input")
-    network = open("road_network.txt", "r")
-    trackInfo = open("gps_data.txt", "r")
-    truth = open("ground_truth_route.txt", "r")
-    os.chdir(os.path.dirname(os.getcwd()))
-    outputPath = os.getcwd() + "\\" + "output"
-    if os.path.exists(outputPath):
-        os.chdir(outputPath)
-    else:
-        os.mkdir(outputPath)
-    geo = open("Seattle.geo", "w")
-    rel = open("Seattle.rel", "w")
-    dyna = open("Seattle.dyna", "w")
-    usr = open("Seattle.usr", "w")
-    route = open("Seattle.route", "w")
+    input_path = './input/Seattle'
+    network = open(os.path.join(input_path, "road_network.txt"), "r")
+    trackInfo = open(os.path.join(input_path, "gps_data.txt"), "r")
+    truth = open(os.path.join(input_path, "ground_truth_route.txt"), "r")
+
+    outputPath = './output/Seattle'
+    ensure_dir(outputPath)
+
+    geo = open(os.path.join(outputPath, "Seattle.geo"), "w")
+    rel = open(os.path.join(outputPath, "Seattle.rel"), "w")
+    dyna = open(os.path.join(outputPath, "Seattle.dyna"), "w")
+    usr = open(os.path.join(outputPath, "Seattle.usr"), "w")
+    route = open(os.path.join(outputPath, "Seattle.route"), "w")
 
 
 def closeFile():
