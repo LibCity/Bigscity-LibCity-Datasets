@@ -1,9 +1,18 @@
 import pickle
 import csv
 import os
+import json
 from util import int_to_isoformat, ensure_dir
 
 geo_cnt = 0
+
+
+def dumpconfig(data_name):
+    config = dict()
+    config['geo'] = dict()
+    config['geo']['including_types'] = ['Point']
+    json.dump(config, open(os.path.join(data_name, 'config.json'),
+                           'w', encoding='utf-8'), ensure_ascii=False)
 
 
 def get_dyna(f, name):
@@ -48,6 +57,8 @@ def get_dyna(f, name):
                         entity_id,
                         get_geo_id(coords)]
             dyna_writer.writerow(dyna_col)
+        break
+    dumpconfig(output_dir)
 
 
 def convert(x):

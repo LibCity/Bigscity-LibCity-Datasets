@@ -2,11 +2,20 @@ from zipfile import ZipFile
 import re
 import os
 import csv
+import json
 from util import int_to_isoformat, ensure_dir
 
 pattern = re.compile(r"(\S+),(\S+),\"\[(.+)]\"\n")
 detail_pattern = re.compile(r"(\S+) (\S+) (\S+), ")
 geo_cnt = 0
+
+
+def dumpconfig(data_name):
+    config = dict()
+    config['geo'] = dict()
+    config['geo']['including_types'] = ['Point']
+    json.dump(config, open(os.path.join(data_name, 'config.json'),
+                           'w', encoding='utf-8'), ensure_ascii=False)
 
 
 def get_dyna(file, name, binary):
@@ -71,6 +80,7 @@ def get_dyna(file, name, binary):
                 dyna_writer.writerow(dyna_col)
         else:
             wrong_columns.append(line)
+    dumpconfig(output_dir)
     if len(wrong_columns) > 0:
         print("wrong_columns in " + name + ":")
         print(wrong_columns)
@@ -90,4 +100,5 @@ def get_dynas(filenames, DATA_NAME="cd_traj"):
             get_dyna(f, DATA_NAME + "_" + filename, binary=False)
 
 
-get_dynas(["chengdushi_1101_1110", "chengdushi_1110_1120", "chengdushi_1120_1130"], "cd_traj")
+DATA_NAME = "cd_traj"
+get_dynas(["chengdushi_1101_1110", "chengdushi_1110_1120", "chengdushi_1120_1130"], DATA_NAME)
