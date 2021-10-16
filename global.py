@@ -1,6 +1,7 @@
 # link: https://zenodo.org/record/57731#.YSJRbGczZPZ
 import os
 import json
+from util import ensure_dir
 
 arcs = nodes = track = geo = dyna = rel = usr = route_unprocessed = route_processed = None
 
@@ -63,7 +64,7 @@ def processRoute():
         line = route_unprocessed.readline()
 
 
-def processConfig():
+def processConfig(name):
     config = dict()
     config['geo'] = dict()
     config['geo']['including_types'] = ['Point']
@@ -78,36 +79,26 @@ def processConfig():
     config['dyna']['trajectory'] = {'entity_id': 'usr_id', 'location': 'geo_id'}
     config['info'] = dict()
     config['info']['with_time'] = False
-    json.dump(config, open('config.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
+    json.dump(config, open(os.path.join('output', 'global', name, 'config.json'), 'w', encoding='utf-8'),
+              ensure_ascii=False, indent=4)
 
 
 def openFile(name):
     global arcs, nodes, track, geo, dyna, rel, usr, config, route_unprocessed, route_processed
-    os.chdir("./input/global")
-    os.chdir(name)
-    arcs = open(name + ".arcs", "r")
-    nodes = open(name + ".nodes", "r")
-    track = open(name + ".track", "r")
-    route_unprocessed = open(name + ".route", "r")
-    os.chdir("../../..")
-    outputPath = os.getcwd() + "\\" + "output"
-    if not os.path.exists(outputPath):
-        os.mkdir(outputPath)
-    os.chdir(outputPath)
-    globalPath = os.getcwd() + "\\" + "global"
-    if not os.path.exists(globalPath):
-        os.mkdir(globalPath)
-    os.chdir(globalPath)
-    outputFilePath = os.getcwd() + "\\" + name
 
-    if not os.path.exists(outputFilePath):
-        os.mkdir(outputFilePath)
-    os.chdir(outputFilePath)
-    geo = open(name + ".geo", "w")
-    dyna = open(name + ".dyna", "w")
-    rel = open(name + ".rel", "w")
-    usr = open(name + ".usr", "w")
-    route_processed = open(name + ".route", "w")
+    input_path = os.path.join('input', 'global', name)
+    arcs = open(os.path.join(input_path, name + ".arcs"), "r")
+    nodes = open(os.path.join(input_path, name + ".nodes"), "r")
+    track = open(os.path.join(input_path, name + ".track"), "r")
+    route_unprocessed = open(os.path.join(input_path, name + ".route"), "r")
+
+    output_path = os.path.join('output', 'global', name)
+    ensure_dir(output_path)
+    geo = open(os.path.join(output_path, name + ".geo"), "w")
+    dyna = open(os.path.join(output_path, name + ".dyna"), "w")
+    rel = open(os.path.join(output_path, name + ".rel"), "w")
+    usr = open(os.path.join(output_path, name + ".usr"), "w")
+    route_processed = open(os.path.join(output_path, name + ".route"), "w")
 
 
 def closeFile():
@@ -121,7 +112,6 @@ def closeFile():
     usr.close()
     route_unprocessed.close()
     route_processed.close()
-    os.chdir("../../..")
 
 
 def dataTransform(name):
@@ -131,7 +121,7 @@ def dataTransform(name):
     processRel()
     processDyna(nodeNum)
     processRoute()
-    processConfig()
+    processConfig(name)
     closeFile()
 
 

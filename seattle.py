@@ -2,7 +2,7 @@
 import re
 import os
 import json
-
+from util import ensure_dir
 network = trackInfo = truth = geo = rel = dyna = usr = route = None
 
 
@@ -11,7 +11,7 @@ def processGeoAndRelAndRoute():
     rel.write("rel_id,type,origin_id,destination_id\n")
     network.readline()
     line = network.readline()
-    nodeInfo = re.search("\(.+\)", line)
+    nodeInfo = re.search("\\(.+\\)", line)
     j = 0
     currentSum = 0
     dic = {}
@@ -36,7 +36,7 @@ def processGeoAndRelAndRoute():
             i += 1
             j += 1
         line = network.readline()
-        nodeInfo = re.search("\(.+\)", line)
+        nodeInfo = re.search("\\(.+\\)", line)
     nodeNum = j
 
     trackInfo.readline()
@@ -104,32 +104,25 @@ def processConfig():
     config['dyna']['including_types'] = ['trajectory']
     config['dyna']['trajectory'] = {'entity_id': 'usr_id', 'location': 'geo_id'}
     config['info'] = dict()
-    json.dump(config, open('config.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
+    json.dump(config, open('output/Seattle/config.json', 'w', encoding='utf-8'),
+              ensure_ascii=False, indent=4)
 
 
 def openFile():
     global network, trackInfo, truth, geo, rel, dyna, usr, route
-    os.chdir("input/Seattle")
-    network = open("road_network.txt", "r")
-    trackInfo = open("gps_data.txt", "r")
-    truth = open("ground_truth_route.txt", "r")
-    os.chdir(os.path.dirname(os.getcwd()))
-    os.chdir("..")
-    outputPath = os.getcwd() + "\\" + "output"
-    if not os.path.exists(outputPath):
-        os.mkdir(outputPath)
-    os.chdir(outputPath)
+    input_path = './input/Seattle'
+    network = open(os.path.join(input_path, "road_network.txt"), "r")
+    trackInfo = open(os.path.join(input_path, "gps_data.txt"), "r")
+    truth = open(os.path.join(input_path, "ground_truth_route.txt"), "r")
 
-    SeattlePath = os.getcwd() + "\\" + "Seattle"
-    if not os.path.exists(SeattlePath):
-        os.mkdir(SeattlePath)
-    os.chdir(SeattlePath)
+    outputPath = './output/Seattle'
+    ensure_dir(outputPath)
 
-    geo = open("Seattle.geo", "w")
-    rel = open("Seattle.rel", "w")
-    dyna = open("Seattle.dyna", "w")
-    usr = open("Seattle.usr", "w")
-    route = open("Seattle.route", "w")
+    geo = open(os.path.join(outputPath, "Seattle.geo"), "w")
+    rel = open(os.path.join(outputPath, "Seattle.rel"), "w")
+    dyna = open(os.path.join(outputPath, "Seattle.dyna"), "w")
+    usr = open(os.path.join(outputPath, "Seattle.usr"), "w")
+    route = open(os.path.join(outputPath, "Seattle.route"), "w")
 
 
 def closeFile():
