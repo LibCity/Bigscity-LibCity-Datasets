@@ -10,11 +10,7 @@ geo_cnt = 0
 
 
 def get_dyna(file, name, binary):
-    cnt = 0
-
     wrong_columns = []
-    ids = {}
-    cur_id = 0
 
     dyna_cnt = 0
     dyna_file = open(os.path.join("output", name + ".dyna"), "w", newline='')
@@ -27,6 +23,12 @@ def get_dyna(file, name, binary):
     geo_writer = csv.writer(geo_file)
     geo_writer.writerow(["geo_id", "type", "coordinates"])
 
+    ids = {}
+    cur_id = 0
+    usr_file = open(os.path.join("output", name + ".usr"), "w", newline='')
+    usr_writer = csv.writer(usr_file)
+    usr_writer.writerow(["usr_id"])
+
     def get_geo_id(coordinates):
         global geo_cnt
         if coordinates not in geos:
@@ -36,7 +38,6 @@ def get_dyna(file, name, binary):
         return geos[coordinates]
 
     for line in file:
-        cnt += 1
         if binary:
             line = line.decode('ascii')
         match = pattern.match(line)
@@ -50,6 +51,7 @@ def get_dyna(file, name, binary):
             if driver_id not in ids:
                 cur_id += 1
                 ids[driver_id] = (cur_id, 0)
+                usr_writer.writerow([cur_id])
             ids[driver_id] = (ids[driver_id][0], ids[driver_id][1] + 1)
             entity_id, traj_id = ids[driver_id]
 
@@ -66,7 +68,6 @@ def get_dyna(file, name, binary):
                 dyna_writer.writerow(dyna_col)
         else:
             wrong_columns.append(line)
-        break
     if len(wrong_columns) > 0:
         print("wrong_columns in " + name + ":")
         print(wrong_columns)

@@ -11,15 +11,19 @@ def get_dyna(name):
     x = pickle.load(f)
 
     dyna_cnt = 0
-    dyna_file = open("output/" + name + ".dyna", "w", newline='')
+    dyna_file = open(os.path.join("output", name + ".dyna"), "w", newline='')
     dyna_writer = csv.writer(dyna_file)
     dyna_writer.writerow(["dyna_id", "type", "time", "entity_id", "location"])
 
     geo_cnt = 0
     geos = {}
-    geo_file = open("output/" + name + ".geo", "w", newline='')
+    geo_file = open(os.path.join("output", name + ".geo"), "w", newline='')
     geo_writer = csv.writer(geo_file)
     geo_writer.writerow(["geo_id", "type", "coordinates"])
+
+    usr_file = open(os.path.join("output", name + ".usr"), "w", newline='')
+    usr_writer = csv.writer(usr_file)
+    usr_writer.writerow(["usr_id"])
 
     def get_geo_id(coordinates):
         global geo_cnt
@@ -32,6 +36,7 @@ def get_dyna(name):
     entity_id = 0
     for path in x:
         entity_id += 1
+        usr_writer.writerow([entity_id])
         for time, coords in path:
             cur_time = int_to_isoformat(time)
             coords = (coords[1], coords[0])  # list to tuple
@@ -41,7 +46,6 @@ def get_dyna(name):
                         entity_id,
                         get_geo_id(coords)]
             dyna_writer.writerow(dyna_col)
-        break
 
 
 def convert(x):
