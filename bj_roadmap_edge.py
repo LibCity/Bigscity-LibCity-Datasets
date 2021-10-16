@@ -62,9 +62,9 @@ def processConfig():
     config['rel']['including_types'] = ['geo']
     config['rel']['geo'] = {}
     config['info'] = dict()
-    config['info']['geo_file'] = 'BJ_roadmap'
-    config['info']['rel_file'] = 'BJ_roadmap'
-    json.dump(config, open('./output/BJ_roadmap/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
+    config['info']['geo_file'] = 'bj_roadmap_edge'
+    config['info']['rel_file'] = 'bj_roadmap_edge'
+    json.dump(config, open('./output/bj_roadmap_edge/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
 
 
 def get_highway_to_num(json_obj, feature='highway'):
@@ -78,7 +78,7 @@ def get_highway_to_num(json_obj, feature='highway'):
 
 
 def main(file_name):
-    file = json.load(open('./input/BJ_roadmap/edges.json', 'r', encoding='utf-8'))
+    file = json.load(open('./input/bj_roadmap_edge/edges.json', 'r', encoding='utf-8'))
     features = file['features']
 
     # check
@@ -88,8 +88,8 @@ def main(file_name):
     highway2num = get_highway_to_num(features, "highway")
 
     # 2 files
-    geo_file = open('./output/BJ_roadmap/' + file_name + '.geo', 'w')
-    rel_file = open('./output/BJ_roadmap/' + file_name + '.rel', 'w')
+    geo_file = open('./output/bj_roadmap_edge/' + file_name + '.geo', 'w')
+    rel_file = open('./output/bj_roadmap_edge/' + file_name + '.rel', 'w')
 
     # feature_list
     feature_list = ["highway", "length", "lanes", "tunnel", "bridge", "maxspeed", "width", "service", "junction", "key"]
@@ -158,15 +158,15 @@ def main(file_name):
                 for b in out_list:
                     rel_file.write(str(i) + ',geo,' + str(a) + ',' + str(b) + '\n')
                     i += 1
-    json.dump(highway2num, open('./output/BJ_roadmap/highway2num.json', 'w'))
+    json.dump(highway2num, open('./output/bj_roadmap_edge/highway2num.json', 'w'))
 
     processConfig()
 
 
 if __name__ == '__main__':
-    outputdir = './output/BJ_roadmap'
+    outputdir = './output/bj_roadmap_edge'
     util.ensure_dir(outputdir)
-    main('BJ_roadmap')
+    main('bj_roadmap_edge')
     # import pandas as pd
-    # a = pd.read_csv('./output/BJ_roadmap/BJ_roadmap.rel')
+    # a = pd.read_csv('./output/bj_roadmap_edge/bj_roadmap_edge.rel')
     # print(a)
