@@ -11,6 +11,14 @@ def dumpconfig(data_name):
     config = dict()
     config['geo'] = dict()
     config['geo']['including_types'] = ['Point']
+    config['geo']['Point'] = dict()
+    config['usr'] = dict()
+    config['usr']['properties'] = dict()
+    config['dyna'] = dict()
+    config['dyna']['including_types'] = ['trajectory']
+    config['dyna']['trajectory'] = {'entity_id': 'usr_id',
+                                    'location': 'geo_id',
+                                    'traj_id': 'num'}
     json.dump(config, open(os.path.join(data_name, 'config.json'),
                            'w', encoding='utf-8'), ensure_ascii=False)
 
@@ -57,7 +65,6 @@ def get_dyna(f, name):
                         entity_id,
                         get_geo_id(coords)]
             dyna_writer.writerow(dyna_col)
-        break
     dumpconfig(output_dir)
 
 

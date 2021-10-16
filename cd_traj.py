@@ -14,6 +14,14 @@ def dumpconfig(data_name):
     config = dict()
     config['geo'] = dict()
     config['geo']['including_types'] = ['Point']
+    config['geo']['Point'] = dict()
+    config['usr'] = dict()
+    config['usr']['properties'] = dict()
+    config['dyna'] = dict()
+    config['dyna']['including_types'] = ['trajectory']
+    config['dyna']['trajectory'] = {'entity_id': 'usr_id',
+                                    'location': 'geo_id',
+                                    'traj_id': 'num'}
     json.dump(config, open(os.path.join(data_name, 'config.json'),
                            'w', encoding='utf-8'), ensure_ascii=False)
 
@@ -90,14 +98,15 @@ def get_dyna(file, name, binary):
 
 def get_dynas(filenames, DATA_NAME="cd_traj"):
     for filename in filenames:
+        time = filename.lstrip("abcdefghijklmnopqrstuvwxyz")
         input_dir = os.path.join("input", DATA_NAME)
         if os.path.exists(os.path.join(input_dir, filename + ".zip")):
             myzip = ZipFile(os.path.join(input_dir, filename + ".zip"))
             f = myzip.open(filename + ".csv")
-            get_dyna(f, DATA_NAME + "_" + filename, binary=True)
+            get_dyna(f, DATA_NAME + time, binary=True)
         elif os.path.exists(os.path.join(input_dir, filename + ".csv")):
             f = open(os.path.join(input_dir, filename + ".csv"))
-            get_dyna(f, DATA_NAME + "_" + filename, binary=False)
+            get_dyna(f, DATA_NAME + time, binary=False)
 
 
 DATA_NAME = "cd_traj"
