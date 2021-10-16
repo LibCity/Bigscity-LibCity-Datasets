@@ -48,21 +48,24 @@ def processGeoAndRelAndRoute():
         j += 1
         nodeInfo = re.split('\t| ', trackInfo.readline())
 
-    route.write("rel_id\n")
+    route.write("route_id,usr_id,rel_id\n")
     truth.readline()
     truth_info = truth.readline()
+    route_id = 0
     while truth_info != '':
         edge_id = truth_info.split("\t")[0]
         traversed = truth_info.split("\t")[1].replace('\n', '')
         if traversed == '1':
             i = 0
             while i < len(dic[edge_id]):
-                route.write(str(dic[edge_id][i]) + '\n')
+                route.write(str(route_id) + ',0,' + str(dic[edge_id][i]) + '\n')
+                route_id += 1
                 i += 1
         else:
             i = len(dic[edge_id]) - 1
             while i >= 0:
-                route.write(str(dic[edge_id][i]) + '\n')
+                route.write(str(route_id) + ',0,' + str(dic[edge_id][i]) + '\n')
+                route_id += 1
                 i -= 1
         truth_info = truth.readline()
     return nodeNum
@@ -101,21 +104,27 @@ def processConfig():
     config['dyna']['including_types'] = ['trajectory']
     config['dyna']['trajectory'] = {'entity_id': 'usr_id', 'location': 'geo_id'}
     config['info'] = dict()
-    json.dump(config, open('config.json', 'w', encoding='utf-8'), ensure_ascii=False)
+    json.dump(config, open('config.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
 
 
 def openFile():
     global network, trackInfo, truth, geo, rel, dyna, usr, route
-    os.chdir("input")
+    os.chdir("input/Seattle")
     network = open("road_network.txt", "r")
     trackInfo = open("gps_data.txt", "r")
     truth = open("ground_truth_route.txt", "r")
     os.chdir(os.path.dirname(os.getcwd()))
+    os.chdir("..")
     outputPath = os.getcwd() + "\\" + "output"
-    if os.path.exists(outputPath):
-        os.chdir(outputPath)
-    else:
+    if not os.path.exists(outputPath):
         os.mkdir(outputPath)
+    os.chdir(outputPath)
+
+    SeattlePath = os.getcwd() + "\\" + "Seattle"
+    if not os.path.exists(SeattlePath):
+        os.mkdir(SeattlePath)
+    os.chdir(SeattlePath)
+
     geo = open("Seattle.geo", "w")
     rel = open("Seattle.rel", "w")
     dyna = open("Seattle.dyna", "w")

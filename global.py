@@ -54,10 +54,12 @@ def processDyna(nodeNum):
 
 
 def processRoute():
-    route_processed.write("rel_id\n")
+    route_processed.write("route_id,usr_id,rel_id\n")
     line = route_unprocessed.readline()
+    route_id = 0
     while line != "":
-        route_processed.write(line)
+        route_processed.write(str(route_id) + ',0,' + line)
+        route_id += 1
         line = route_unprocessed.readline()
 
 
@@ -76,31 +78,31 @@ def processConfig():
     config['dyna']['trajectory'] = {'entity_id': 'usr_id', 'location': 'geo_id'}
     config['info'] = dict()
     config['info']['with_time'] = False
-    json.dump(config, open('config.json', 'w', encoding='utf-8'), ensure_ascii=False)
+    json.dump(config, open('config.json', 'w', encoding='utf-8'), ensure_ascii=False, indent=4)
 
 
 def openFile(name):
     global arcs, nodes, track, geo, dyna, rel, usr, config, route_unprocessed, route_processed
-    os.chdir("input")
+    os.chdir("./input/global")
     os.chdir(name)
     arcs = open(name + ".arcs", "r")
     nodes = open(name + ".nodes", "r")
     track = open(name + ".track", "r")
     route_unprocessed = open(name + ".route", "r")
-    os.chdir(os.path.dirname(os.getcwd()))
-    os.chdir(os.path.dirname(os.getcwd()))
+    os.chdir("../../..")
     outputPath = os.getcwd() + "\\" + "output"
-    outputFilePath = outputPath + "\\" + name
-    if os.path.exists(outputPath):
-        os.chdir(outputPath)
-    else:
+    if not os.path.exists(outputPath):
         os.mkdir(outputPath)
-        os.chdir(outputPath)
-    if os.path.exists(outputFilePath):
-        os.chdir(outputFilePath)
-    else:
+    os.chdir(outputPath)
+    globalPath = os.getcwd() + "\\" + "global"
+    if not os.path.exists(globalPath):
+        os.mkdir(globalPath)
+    os.chdir(globalPath)
+    outputFilePath = os.getcwd() + "\\" + name
+
+    if not os.path.exists(outputFilePath):
         os.mkdir(outputFilePath)
-        os.chdir(outputFilePath)
+    os.chdir(outputFilePath)
     geo = open(name + ".geo", "w")
     dyna = open(name + ".dyna", "w")
     rel = open(name + ".rel", "w")
@@ -119,8 +121,7 @@ def closeFile():
     usr.close()
     route_unprocessed.close()
     route_processed.close()
-    os.chdir(os.path.dirname(os.getcwd()))
-    os.chdir(os.path.dirname(os.getcwd()))
+    os.chdir("../../..")
 
 
 def dataTransform(name):
