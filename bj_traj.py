@@ -17,8 +17,7 @@ def dumpconfig(data_name):
     config['dyna'] = dict()
     config['dyna']['including_types'] = ['trajectory']
     config['dyna']['trajectory'] = {'entity_id': 'usr_id',
-                                    'location': 'geo_id',
-                                    'traj_id': 'num'}
+                                    'location': 'geo_id'}
     json.dump(config, open(os.path.join(data_name, 'config.json'),
                            'w', encoding='utf-8'), ensure_ascii=False)
 
