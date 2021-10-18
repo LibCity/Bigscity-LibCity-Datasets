@@ -12,16 +12,13 @@ geo_cnt = 0
 
 def dumpconfig(data_name):
     config = dict()
-    config['geo'] = dict()
-    config['geo']['including_types'] = ['Point']
-    config['geo']['Point'] = dict()
     config['usr'] = dict()
     config['usr']['properties'] = dict()
     config['dyna'] = dict()
     config['dyna']['including_types'] = ['trajectory']
     config['dyna']['trajectory'] = {'entity_id': 'usr_id',
                                     'location': 'geo_id',
-                                    'traj_id': 'num'}
+                                    'traj_id': 'coordinate'}
     json.dump(config, open(os.path.join(data_name, 'config.json'),
                            'w', encoding='utf-8'), ensure_ascii=False)
 
@@ -37,25 +34,11 @@ def get_dyna(file, name, binary):
     dyna_writer = csv.writer(dyna_file)
     dyna_writer.writerow(["dyna_id", "type", "time", "entity_id", "traj_id", "location"])
 
-    geo_cnt = 0
-    geos = {}
-    geo_file = open(os.path.join(output_dir, name + ".geo"), "w", newline='')
-    geo_writer = csv.writer(geo_file)
-    geo_writer.writerow(["geo_id", "type", "coordinates"])
-
     ids = {}
     cur_id = 0
     usr_file = open(os.path.join(output_dir, name + ".usr"), "w", newline='')
     usr_writer = csv.writer(usr_file)
     usr_writer.writerow(["usr_id"])
-
-    def get_geo_id(coordinates):
-        global geo_cnt
-        if coordinates not in geos:
-            geo_cnt += 1
-            geos[coordinates] = geo_cnt
-            geo_writer.writerow([geo_cnt, "Point", [coordinates[0], coordinates[1]]])
-        return geos[coordinates]
 
     for line in file:
         if binary:
@@ -80,11 +63,10 @@ def get_dyna(file, name, binary):
             for detail in positions:
                 longitude, latitude, time = detail
                 cur_time = int_to_isoformat(int(time))
-                coords = (float(longitude), float(latitude))
+                coords = [float(longitude), float(latitude)]
                 dyna_cnt += 1
                 dyna_col = [dyna_cnt, "trajectory", cur_time,
-                            entity_id, traj_id,
-                            get_geo_id(coords)]
+                            entity_id, traj_id, coords]
                 dyna_writer.writerow(dyna_col)
         else:
             wrong_columns.append(line)
