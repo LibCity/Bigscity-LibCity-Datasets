@@ -143,43 +143,6 @@ def write_dyna() -> None:
     del ad
     dyna_file.close()
 
-
-# def write_dyna2():
-#     # actually effectively a .rel file
-#     grid_file = open(prefix + '.dyna', 'w')
-#
-#     grid_file.write(','.join(grid_columns))
-#     grid_file.write('\n')
-#
-#     maps = {}
-#     for k in ['risk_mask', 'grid_node_map']:
-#         with open(dataurl + '/nyc/' + k + '.pkl', 'rb') as f:
-#             maps[k] = pickle.load(f)
-#
-#     # avoids overlap with .dyna file
-#     grid_id = dyna_count
-#     for i in range(row_count):
-#         for j in range(column_count):
-#             row = [
-#                     grid_id,
-#                     grid_type,
-#                     '1970-01-01T00:00:00Z',  # dummy
-#                     i,
-#                     j,
-#                     maps['risk_mask'][j][i],
-#                     # column first; embeds ndarray of shape (row_count, column_count, graph_node_count)
-#                     # avoids nightmarish eval()
-#                     '\"' + ' '.join(map(str, maps['grid_node_map'][j * row_count + i, :].tolist())) + '\"'
-#             ]
-#             grid_file.write(','.join(map(str, row)))
-#             grid_file.write('\n')
-#
-#             grid_id += 1
-#
-#     del maps
-#     grid_file.close()
-
-
 def write_config() -> None:
     config = {
         'geo': {
@@ -200,10 +163,6 @@ def write_config() -> None:
                 'poi_adj': 'num'
             }
         },
-        # 'dyna': {
-        #     'including_types': dyna_type,
-        #     dyna_type: dict(map(lambda x: (x, 'num'), dyna_columns))
-        # },
         'grid': {
             'including_types': dyna_type,
             dyna_type: {
@@ -254,7 +213,6 @@ def write_config() -> None:
 
 if __name__ == '__main__':
     write_geo()
-    # write_rel()
-    # write_dyna()
-    # # write_dyna2()
-    # write_config()
+    write_rel()
+    write_dyna()
+    write_config()
