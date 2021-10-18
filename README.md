@@ -51,9 +51,9 @@ Here we present the statistics of the  datasets we have processed.
 | Global          | 11045       | 18196     | 1       | 2502        | Neftekamsk, Republic of Bashkortostan, Russian Federation | —                                | 1s       |
 | bj_roadmap_edge | 38027       | 95660     | —       | —           | Beijing, China                                            | —                                | —        |
 | bj_roadmap_node | 16927       | 38027     | —       | —           | Beijing, China                                            | —                                | —        |
-| cd_traj         | 591,977,313 | —         | 99,084  | —           | Chengdu, China                                            | Nov. 01, 2018 - Nov. 30, 2018    | —        |
-| xa_traj         | 688,796,584 | —         | 55,916  | —           | Xi'an, China                                              | Oct. 01, 2018 - Nov. 30, 2018    | —        |
-| bj_traj         | —           | —         | 321,198 | 5,580,718   | Beijing, China                                            | Jun. 2015                        | —        |
+| cd_traj         | 591,977,313 | —         | 99,084  | —           | Chengdu, China                                            | Nov. 01, 2018 - Nov. 15, 2018    | —        |
+| xa_traj         | 688,796,584 | —         | 55,916  | —           | Xi'an, China                                              | Oct. 01, 2018 - Oct. 15, 2018    | —        |
+| bj_traj         | —           | —         | 321,198 | 5,580,718   | Beijing, China                                            | Jun. 01, 2015                    | —        |
 
 Note：
 
