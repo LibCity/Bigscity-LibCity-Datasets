@@ -45,9 +45,11 @@ edge_feature_values = {'oneway': {False, 'True', 'False', True},
                        'junction': {'roundabout'}}  # if roundabout
 edge_feature_values['highway'].remove("unclassified")  # useless
 highway_list = list(edge_feature_values['highway'])
+highway_list.sort()
 highway_to_int = {}
 for i in range(0, len(highway_list)):
     highway_to_int[highway_list[i]] = i + 1
+print(highway_to_int)
 
 rel_feature_names = ["highway", "length", "lanes", "tunnel", "bridge", "maxspeed", "width", "alley", "roundabout"]
 

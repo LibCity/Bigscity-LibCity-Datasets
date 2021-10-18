@@ -67,13 +67,23 @@ def processConfig():
 
 
 def get_highway_to_num(json_obj, feature='highway'):
-    res = dict()
+    highway_list = []
     i = 0
     for line in json_obj:
-        if str(line['properties'][feature]) not in res.keys():
-            res[str(line['properties'][feature])] = i
-            i += 1
-    return res
+        if isinstance(line['properties'][feature], list):
+            highway = line['properties'][feature][0]
+        else:
+            highway = line['properties'][feature]
+        if highway == "unclassified":
+            continue
+        if str(highway) not in highway_list:
+            if str(highway) != "unclassified":
+                highway_list.append(str(highway))
+    highway_list.sort()
+    highway_to_int = {}
+    for i in range(0, len(highway_list)):
+        highway_to_int[highway_list[i]] = i + 1
+    return highway_to_int
 
 
 def main(file_name):
@@ -112,7 +122,9 @@ def main(file_name):
         geo_file.write(str(geo_id) + ',' + type + ',"' + str(coordinates) + '"')
         for feature in feature_list:
             if feature == 'highway':
-                if isinstance(properties[feature], list):
+                if properties[feature] is None or properties[feature] == "unclassified" or properties[feature][0] == "unclassified":
+                    geo_file.write(', 0')
+                elif isinstance(properties[feature], list):
                     geo_file.write(',' + str(highway2num[str(properties[feature][0])]))
                 else:
                     geo_file.write(',' + str(highway2num[str(properties[feature])]))  # no none
