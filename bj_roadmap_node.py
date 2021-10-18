@@ -6,8 +6,8 @@ from util import ensure_dir
 DATA_NAME = "bj_roadmap_node"
 
 # dataset preprocess
-# # get dataset values
-# edge_feature_names = ["oneway", "highway", "lanes", "tunnel", "bridge", "access", "service", "junction"]
+# get dataset values
+# edge_feature_names = ["oneway", "highway", "lanes", "tunnel", "bridge", "access", "service", "junction", "key"]
 # edge_feature_sets = {}
 # for edge_feature in edge_feature_names:
 #     edge_feature_sets[edge_feature] = set()
@@ -63,7 +63,6 @@ geo_file = open(os.path.join(output_dir, DATA_NAME + ".geo"), "w", newline='')
 geo_writer = csv.writer(geo_file)
 geo_writer.writerow(["geo_id", "type", "coordinates", "highway"])
 
-rel_cnt = 0
 rel_file = open(os.path.join(output_dir, DATA_NAME + ".rel"), "w", newline='')
 rel_writer = csv.writer(rel_file)
 rel_titles = ["rel_id", "type", "origin_id", "destination_id"] + rel_feature_names
@@ -102,16 +101,15 @@ for feature in edge_features:
                       "length": 0 if properties["length"] is None else float(properties["length"]),
                       "width": 0 if properties["width"] is None else float(properties["width"]),
                       "roundabout": 0 if properties["junction"] is None else 1}
-    coords_u = (nodes[properties["u"]]["x"], nodes[properties["u"]]["y"])
-    coords_v = (nodes[properties["v"]]["x"], nodes[properties["v"]]["y"])
 
-    rel_cnt += 1
-    rel_output = [rel_cnt, "geo", int(properties["u"]), int(properties["v"])]
+    rel_output = [properties["fid"], "geo", int(properties["u"]), int(properties["v"])]
     for feature_name in rel_feature_names:
         rel_output.append(rel_properties[feature_name])
     rel_writer.writerow(rel_output)
 
     # check how many lon-la coords in nodes.json in LineString between points
+    # coords_u = (nodes[properties["u"]]["x"], nodes[properties["u"]]["y"])
+    # coords_v = (nodes[properties["v"]]["x"], nodes[properties["v"]]["y"])
     # results: only 5 points
     # geometry = feature["geometry"]
     # assert geometry["type"] == "LineString"

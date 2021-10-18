@@ -55,9 +55,8 @@ def processConfig():
     config['geo']['LineString']['bridge'] = 'num'
     config['geo']['LineString']['maxspeed'] = 'num'
     config['geo']['LineString']['width'] = 'num'
-    config['geo']['LineString']['service'] = 'num'
-    config['geo']['LineString']['junction'] = 'num'
-    config['geo']['LineString']['key'] = 'num'
+    config['geo']['LineString']['alley'] = 'num'
+    config['geo']['LineString']['roundabout'] = 'num'
     config['rel'] = dict()
     config['rel']['including_types'] = ['geo']
     config['rel']['geo'] = {}
@@ -92,12 +91,16 @@ def main(file_name):
     rel_file = open('./output/bj_roadmap_edge/' + file_name + '.rel', 'w')
 
     # feature_list
-    feature_list = ["highway", "length", "lanes", "tunnel", "bridge", "maxspeed", "width", "service", "junction", "key"]
+    feature_list = ["highway", "length", "lanes", "tunnel", "bridge", "maxspeed", "width", "service", "junction"]
     new_feature_list = find_useful_features(feature_list, features)
     assert feature_list == new_feature_list
 
     geo_file.write("geo_id,type,coordinates")
     for feature in feature_list:
+        if feature == "service":
+            feature = "alley"
+        if feature == "junction":
+            feature = "roundabout"
         geo_file.write(',' + feature)
     geo_file.write('\n')
 
@@ -109,7 +112,10 @@ def main(file_name):
         geo_file.write(str(geo_id) + ',' + type + ',"' + str(coordinates) + '"')
         for feature in feature_list:
             if feature == 'highway':
-                geo_file.write(',' + str(highway2num[str(properties[feature])]))  # no none
+                if isinstance(properties[feature], list):
+                    geo_file.write(',' + str(highway2num[str(properties[feature][0])]))
+                else:
+                    geo_file.write(',' + str(highway2num[str(properties[feature])]))  # no none
             elif feature == 'length':
                 geo_file.write(',' + ('0' if properties[feature] is None else str(properties[feature])))
             elif feature == 'lanes':
@@ -129,8 +135,6 @@ def main(file_name):
                 geo_file.write(',' + ('0' if properties[feature] is None else str(1)))
             elif feature == 'junction':
                 geo_file.write(',' + ('0' if properties[feature] is None else str(1)))
-            elif feature == 'key':
-                geo_file.write(',' + str(properties[feature]))
 
         geo_file.write('\n')
 
