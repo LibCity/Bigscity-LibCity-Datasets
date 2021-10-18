@@ -4,7 +4,29 @@ import os
 import json
 from util import int_to_isoformat, ensure_dir
 
+
+def convert(x):
+    if x <= 10:
+        return "0" + str(x)
+    return str(x)
+
+
+month = 6  # ONLY CHANGE HERE IF U WANT OTHER MONTHS' DATA
+DATA_NAME = "bj_traj_2015" + convert(month)
 geo_cnt = 0
+output_dir = os.path.join("output", DATA_NAME)
+ensure_dir(output_dir)
+
+dyna_cnt = 0
+dyna_file = open(os.path.join(output_dir, DATA_NAME + ".dyna"), "w", newline='')
+dyna_writer = csv.writer(dyna_file)
+dyna_writer.writerow(["dyna_id", "type", "time", "entity_id", "location"])
+
+usr_file = open(os.path.join(output_dir, DATA_NAME + ".usr"), "w", newline='')
+usr_writer = csv.writer(usr_file)
+usr_writer.writerow(["usr_id"])
+
+entity_id = 0
 
 
 def dumpconfig(data_name):
@@ -19,22 +41,10 @@ def dumpconfig(data_name):
                            'w', encoding='utf-8'), ensure_ascii=False)
 
 
-def get_dyna(f, name):
+def get_dyna(f):
+    global entity_id, dyna_cnt
     x = pickle.load(f)
 
-    output_dir = os.path.join("output", name)
-    ensure_dir(output_dir)
-
-    dyna_cnt = 0
-    dyna_file = open(os.path.join(output_dir, name + ".dyna"), "w", newline='')
-    dyna_writer = csv.writer(dyna_file)
-    dyna_writer.writerow(["dyna_id", "type", "time", "entity_id", "location"])
-
-    usr_file = open(os.path.join(output_dir, name + ".usr"), "w", newline='')
-    usr_writer = csv.writer(usr_file)
-    usr_writer.writerow(["usr_id"])
-
-    entity_id = 0
     for path in x:
         entity_id += 1
         usr_writer.writerow([entity_id])
@@ -46,17 +56,8 @@ def get_dyna(f, name):
             dyna_col = [dyna_cnt, "trajectory", cur_time,
                         entity_id, coords]
             dyna_writer.writerow(dyna_col)
-    dumpconfig(output_dir)
 
 
-def convert(x):
-    if x <= 10:
-        return "0" + str(x)
-    return str(x)
-
-
-DATA_NAME = "bj_traj"
-month = 6
 for day in range(1, 32):
     time = "2015" + convert(month) + convert(day)
     file_name = "gps_" + time
@@ -64,4 +65,6 @@ for day in range(1, 32):
     input_filename = os.path.join(input_dirname, file_name)
     if os.path.exists(input_filename):
         file = open(input_filename, "rb")
-        get_dyna(file, DATA_NAME + "_" + time)
+        get_dyna(file)
+
+dumpconfig(output_dir)
