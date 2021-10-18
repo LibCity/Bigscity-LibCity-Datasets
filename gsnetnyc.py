@@ -3,13 +3,10 @@ import pandas as pd
 import datetime
 import json
 import pickle
-import util
 import sys
 
 
 dataurl, outputdir, prefix = 'input/GSNetNYC', 'output/GSNetNYC', 'output/GSNetNYC/GSNetNYC'
-util.ensure_dir(dataurl)
-util.ensure_dir(outputdir)
 
 
 row_count, column_count = 20, 20
@@ -17,30 +14,40 @@ graph_node_count = 243
 dyna_count = 3504000
 
 
-geo_columns = ['geo_id', 'type', 'coordinates']
+geo_columns = ['geo_id', 'type', 'coordinates', 'row_id', 'column_id']
 rel_columns = ['rel_id', 'type', 'origin_id', 'destination_id', 'road_adj', 'risk_adj', 'poi_adj']
-dyna_columns = ['dyna_id', 'type', 'time', 'row_id', 'column_id', 'risk', 'holiday', *[f'poi_type_{i}' for i in range(7)],
-            'temperature', *[f'weather_{n}' for n in ['clear', 'cloudy', 'rain', 'snow', 'mist']], 
+dyna_columns = ['dyna_id', 'type', 'time', 'row_id', 'column_id', 'risk_mask', 'risk', 'holiday', *[f'poi_type_{i}' for i in range(7)],
+            'temperature', *[f'weather_{n}' for n in ['clear', 'cloudy', 'rain', 'snow', 'mist']],
             'inflow', 'outflow']
 grid_columns = ['dyna_id', 'type', 'time', 'row_id', 'column_id', 'risk_mask', 'grid_node_map']
 
-geo_type = 'GraphNode'
-rel_type = 'rel'
+geo_type = 'Polygon'
+rel_type = 'geo'
 dyna_type = 'state'
-grid_type = 'grid'
 
 
 def write_geo() -> None:
     # write graph nodes instead of grids
     geo_file = open(prefix + '.geo', 'w')
+    with open(dataurl + '/nyc/grid_node_map.pkl', 'rb') as f:
+        grid_node_map = pickle.load(f)
+
+    effective_node = []
+    for i in range(grid_node_map.shape[0]):
+        grid = grid_node_map[i]
+        if np.sum(grid) != 0:
+           effective_node.append(i)
 
     geo_file.write(','.join(geo_columns))
     geo_file.write('\n')
-
+    i = 0
     for nid in range(graph_node_count):
-        row = [nid, geo_type, []]
+        row_id = effective_node[i] // 20
+        column_id = effective_node[i] % 20
+        row = [nid, geo_type, [], row_id, column_id]
         geo_file.write(','.join(map(str, row)))
         geo_file.write('\n')
+        i += 1
 
     geo_file.close()
 
@@ -84,6 +91,9 @@ def write_dyna() -> None:
     with open(dataurl + '/nyc/all_data.pkl', 'rb') as f:
         ad = pickle.load(f)
 
+    with open(dataurl + '/nyc/risk_mask.pkl', 'rb') as f:
+        rm = pickle.load(f)
+
     dyna_file.write(','.join(dyna_columns))
     dyna_file.write('\n')
 
@@ -103,6 +113,7 @@ def write_dyna() -> None:
                         dt,
                         r,
                         c,
+                        rm[c][r],
                         curr_row_raw[0],
                         curr_row_raw[32],
                         *[curr_row_raw[33+i] for i in range(7)],
@@ -133,40 +144,40 @@ def write_dyna() -> None:
     dyna_file.close()
 
 
-def write_dyna2():
-    # actually effectively a .rel file
-    grid_file = open(prefix + '.dyna', 'w')
-
-    grid_file.write(','.join(grid_columns))
-    grid_file.write('\n')
-
-    maps = {}
-    for k in ['risk_mask', 'grid_node_map']:
-        with open(dataurl + '/nyc/' + k + '.pkl', 'rb') as f:
-            maps[k] = pickle.load(f)
-
-    # avoids overlap with .dyna file
-    grid_id = dyna_count
-    for i in range(row_count):
-        for j in range(column_count):
-            row = [
-                    grid_id,
-                    grid_type,
-                    '1970-01-01T00:00:00Z',  # dummy
-                    i,
-                    j,
-                    maps['risk_mask'][j][i],
-                    # column first; embeds ndarray of shape (row_count, column_count, graph_node_count)
-                    # avoids nightmarish eval()
-                    '\"' + ' '.join(map(str, maps['grid_node_map'][j * row_count + i, :].tolist())) + '\"'
-            ]
-            grid_file.write(','.join(map(str, row)))
-            grid_file.write('\n')
-
-            grid_id += 1
-
-    del maps
-    grid_file.close()
+# def write_dyna2():
+#     # actually effectively a .rel file
+#     grid_file = open(prefix + '.dyna', 'w')
+#
+#     grid_file.write(','.join(grid_columns))
+#     grid_file.write('\n')
+#
+#     maps = {}
+#     for k in ['risk_mask', 'grid_node_map']:
+#         with open(dataurl + '/nyc/' + k + '.pkl', 'rb') as f:
+#             maps[k] = pickle.load(f)
+#
+#     # avoids overlap with .dyna file
+#     grid_id = dyna_count
+#     for i in range(row_count):
+#         for j in range(column_count):
+#             row = [
+#                     grid_id,
+#                     grid_type,
+#                     '1970-01-01T00:00:00Z',  # dummy
+#                     i,
+#                     j,
+#                     maps['risk_mask'][j][i],
+#                     # column first; embeds ndarray of shape (row_count, column_count, graph_node_count)
+#                     # avoids nightmarish eval()
+#                     '\"' + ' '.join(map(str, maps['grid_node_map'][j * row_count + i, :].tolist())) + '\"'
+#             ]
+#             grid_file.write(','.join(map(str, row)))
+#             grid_file.write('\n')
+#
+#             grid_id += 1
+#
+#     del maps
+#     grid_file.close()
 
 
 def write_config() -> None:
@@ -175,32 +186,34 @@ def write_config() -> None:
             'including_types': geo_type,
             geo_type: {
                 'coordinates': 'list',  # TODO
+                'row_id': 'num',
+                'column_id': 'num',
             }
         },
         'rel': {
             'including_types': rel_type,
             rel_type: {
-                'risk_mask': 'num',
+                'origin_id': 'num',
+                'destination_id': 'num',
                 'road_adj': 'num',
                 'risk_adj': 'num',
                 'poi_adj': 'num'
             }
         },
-        'dyna': {
-            'including_types': dyna_type,
-            dyna_type: dict(map(lambda x: (x, 'num'), dyna_columns))
-        },
+        # 'dyna': {
+        #     'including_types': dyna_type,
+        #     dyna_type: dict(map(lambda x: (x, 'num'), dyna_columns))
+        # },
         'grid': {
-            'including_types': grid_type,
-            grid_type: {
+            'including_types': dyna_type,
+            dyna_type: {
                 'row_id': 'num',
                 'column_id': 'num',
                 'risk_mask': 'num',
-                'grid_node_map': 'str'
             }
         },
         'info': {
-            'data_col': dyna_columns[5:],
+            'data_col': dyna_columns[6:],
             'data_files': ['GSNetNYC'],
             'graph_input_col': [
                 'risk',
@@ -241,7 +254,7 @@ def write_config() -> None:
 
 if __name__ == '__main__':
     write_geo()
-    write_rel()
-    write_dyna()
-    write_dyna2()
-    write_config()
+    # write_rel()
+    # write_dyna()
+    # # write_dyna2()
+    # write_config()
