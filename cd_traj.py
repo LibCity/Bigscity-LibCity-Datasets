@@ -1,3 +1,4 @@
+# link: Please contact the author!
 from zipfile import ZipFile
 import re
 import os
@@ -24,6 +25,7 @@ def dumpconfig(data_name):
 
 
 def get_dyna(file, name, binary):
+    print("starting " + name)
     wrong_columns = []
 
     output_dir = os.path.join("output", name)
@@ -91,5 +93,6 @@ def get_dynas(filenames, DATA_NAME="cd_traj"):
             get_dyna(f, DATA_NAME + time, binary=False)
 
 
-DATA_NAME = "cd_traj"
-get_dynas(["chengdushi_1101_1110", "chengdushi_1110_1120", "chengdushi_1120_1130"], DATA_NAME)
+if __name__ == "__main__":
+    DATA_NAME = "cd_traj"
+    get_dynas(["chengdushi_1101_1110", "chengdushi_1110_1120", "chengdushi_1120_1130"], DATA_NAME)
