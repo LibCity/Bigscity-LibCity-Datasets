@@ -3,72 +3,112 @@ import re
 import os
 import json
 from util import ensure_dir
-network = trackInfo = truth = geo = rel = dyna = usr = route = None
+from datetime import datetime
+
+network = trackInfo = truth = geo = rel = dyna = usr = dyna_route = None
 
 
-def processGeoAndRelAndRoute():
-    geo.write("geo_id, type, coordinate\n")
+def processGeoRelDyna():
+    # title
+    geo.write("geo_id,type,coordinate\n")
     rel.write("rel_id,type,origin_id,destination_id\n")
+    dyna.write("dyna_id,type,time,entity_id,coordinate\n")
+
+    # a dictionary, key: node_id, value: {"prev": [geo_id], "next": [geo_id]}
+    rel_dct = {}
+    edge_geo_dct = {}
+
+    # read network, write geo, inner rel / save outer rel in rel_dct
+    geo_id = rel_id = 0
     network.readline()
-    line = network.readline()
-    nodeInfo = re.search("\\(.+\\)", line)
-    j = 0
-    currentSum = 0
-    dic = {}
-    while nodeInfo is not None:
-        flag = line.split('\t')[3]
-        nodes = nodeInfo[0].replace('(', '').replace(')', '').split(', ')
-        i = 0
-        while i < len(nodes):
-            node1 = nodes[i].split(" ")[0]
-            node2 = nodes[i].split(" ")[1]
-            geo.write(str(j) + ',Point,"[' + node1 + ',' + node2 + ']"\n')
-            if i != len(nodes) - 1:
-                rel.write(str(currentSum) + ',geo,' + str(j) + ',' + str(j + 1) + '\n')
-                if line.split('\t')[0] in dic.keys():
-                    dic[line.split('\t')[0]].append(currentSum)
-                else:
-                    dic[line.split('\t')[0]] = [currentSum]
-                currentSum += 1
-                if flag == '1':
-                    rel.write(str(currentSum) + ',geo,' + str(j + 1) + ',' + str(j) + '\n')
-                    currentSum += 1
-            i += 1
-            j += 1
-        line = network.readline()
-        nodeInfo = re.search("\\(.+\\)", line)
-    nodeNum = j
+    for line in network:
+        if not line:
+            break
 
+        # save outer rel
+        edge_id, from_id, to_id = line.split('\t')[0:3]
+
+        # init rel_dct
+        if from_id not in rel_dct.keys():
+            rel_dct[from_id] = {"prev": [], "next": []}
+        if to_id not in rel_dct.keys():
+            rel_dct[to_id] = {"prev": [], "next": []}
+
+        # two way flag
+        two_way = line.split('\t')[3]
+
+        # get node list
+        nodes_str = re.search("\\(.+\\)", line)[0]
+        nodes_str_lst = nodes_str.replace('(', '').replace(')', '').split(', ')
+        node_lst = list(map(lambda x: [eval(x.split(' ')[0]), eval(x.split(' ')[1])], nodes_str_lst))
+
+        # write geo and inner rel
+        node_i = 0
+
+        # set rel_dct 1
+        rel_dct[from_id]["next"].append(geo_id)
+        edge_geo_dct[edge_id] = []
+        while node_i < len(node_lst) - 1:
+            geo.write(str(geo_id) + ',LineString,"' + str([node_lst[node_i], node_lst[node_i + 1]]) + '"\n')
+            edge_geo_dct[edge_id].append(geo_id)
+            geo_id += 1
+            if node_i != len(node_lst) - 2:
+                rel.write(str(rel_id) + ',geo,' + str(geo_id - 1) + ',' + str(geo_id) + '\n')
+                rel_id += 1
+            node_i += 1
+
+        # set rel_dct 2
+        rel_dct[to_id]["prev"].append(geo_id - 1)
+
+        if two_way:
+            node_i = 0
+
+            # set rel_dct 3
+            rel_dct[from_id]["prev"].append(geo_id)
+
+            while node_i < len(node_lst) - 1:
+                geo.write(str(geo_id) + ',LineString,"' + str([node_lst[node_i + 1], node_lst[node_i]]) + '"\n')
+                geo_id += 1
+                if node_i != len(node_lst) - 2:
+                    rel.write(str(rel_id) + ',geo,' + str(geo_id) + ',' + str(geo_id - 1) + '\n')
+                    rel_id += 1
+                node_i += 1
+
+            # set rel_dct 4
+            rel_dct[to_id]["next"].append(geo_id - 1)
+
+    # write outer rel
+    for _, dct in rel_dct.items():
+        for edge_i in dct["prev"]:
+            for edge_j in dct["next"]:
+                rel.write(str(rel_id) + ',geo,' + str(edge_i) + ',' + str(edge_j) + '\n')
+                rel_id += 1
+
+    # track
+    dyna_id = 0
     trackInfo.readline()
-    nodeInfo = re.split('\t| ', trackInfo.readline())
-    while len(nodeInfo) == 6:
-        node1 = nodeInfo[3]
-        node2 = nodeInfo[2]
-        geo.write(str(j) + ',Point,"[' + node1 + ',' + node2 + ']"\n')
-        j += 1
-        nodeInfo = re.split('\t| ', trackInfo.readline())
+    for line in trackInfo:
+        lat = eval(line.split()[2])
+        lon = eval(line.split()[3])
+        date = datetime.strptime(line.split()[0] + ' ' + line.split()[1], '%d-%b-%Y %H:%M:%S')
+        time = date.strftime('%Y-%m-%dT%H:%M:%SZ')
+        dyna.write(str(dyna_id) + ',trajectory,' + time + ',0,"' + str([lon, lat]) + '"\n')
+        dyna_id += 1
 
-    route.write("route_id,usr_id,rel_id\n")
+    dyna_route.write("dyna_id,type,time,entity_id,location\n")
     truth.readline()
-    truth_info = truth.readline()
-    route_id = 0
-    while truth_info != '':
-        edge_id = truth_info.split("\t")[0]
-        traversed = truth_info.split("\t")[1].replace('\n', '')
-        if traversed == '1':
-            i = 0
-            while i < len(dic[edge_id]):
-                route.write(str(route_id) + ',0,' + str(dic[edge_id][i]) + '\n')
-                route_id += 1
-                i += 1
+    dyna_id = 0
+    for line in truth:
+        edge_id = line.split()[0]
+        traversed = int(line.split()[1].strip())
+        if traversed == 1:
+            for geo_id in edge_geo_dct[edge_id]:
+                dyna_route.write(str(dyna_id) + ',trajectory,,0,' + str(geo_id) + "\n")
+                dyna_id += 1
         else:
-            i = len(dic[edge_id]) - 1
-            while i >= 0:
-                route.write(str(route_id) + ',0,' + str(dic[edge_id][i]) + '\n')
-                route_id += 1
-                i -= 1
-        truth_info = truth.readline()
-    return nodeNum
+            for geo_id in edge_geo_dct[edge_id][::-1]:
+                dyna_route.write(str(dyna_id) + ',trajectory,,0,' + str(geo_id) + "\n")
+                dyna_id += 1
 
 
 def processUsr():
@@ -76,40 +116,31 @@ def processUsr():
     usr.write("0")
 
 
-def processDyna(nodeNum):
-    dyna.write("dyna_id,type,time,entity_id,location\n")
-    trackInfo.seek(0)
-    trackInfo.readline()
-    nodeInfo = re.split('\t| ', trackInfo.readline())
-    i = 0
-    while len(nodeInfo) == 6:
-        second = nodeInfo[1]
-        time = "2009-01-17T" + second + 'Z'
-        dyna.write(str(i) + ',trajectory,' + time + ',0,' + str(i + nodeNum) + '\n')
-        i += 1
-        nodeInfo = re.split('\t| ', trackInfo.readline())
-
-
 def processConfig():
     config = dict()
     config['geo'] = dict()
-    config['geo']['including_types'] = ['Point']
+    config['geo']['including_types'] = ['LineString']
     config['geo']['Point'] = {}
     config['usr'] = dict()
     config['usr']['properties'] = {}
     config['rel'] = dict()
     config['rel']['including_types'] = ['geo']
-    config['rel']['geo'] = {'speed': 'num'}
+    config['rel']['geo'] = {}
     config['dyna'] = dict()
     config['dyna']['including_types'] = ['trajectory']
-    config['dyna']['trajectory'] = {'entity_id': 'usr_id', 'location': 'geo_id'}
+    config['dyna']['trajectory'] = {'entity_id': 'usr_id'}
     config['info'] = dict()
+    config['info']['geo_file'] = 'Seattle'
+    config['info']['rel_file'] = 'Seattle'
+    config['info']['usr_file'] = 'Seattle'
+    config['info']['dyna_file'] = 'Seattle'
+    config['info']['truth_file'] = 'Seattle_truth'
     json.dump(config, open('output/Seattle/config.json', 'w', encoding='utf-8'),
               ensure_ascii=False, indent=4)
 
 
 def openFile():
-    global network, trackInfo, truth, geo, rel, dyna, usr, route
+    global network, trackInfo, truth, geo, rel, dyna, usr, dyna_route
     input_path = './input/Seattle'
     network = open(os.path.join(input_path, "road_network.txt"), "r")
     trackInfo = open(os.path.join(input_path, "gps_data.txt"), "r")
@@ -122,11 +153,11 @@ def openFile():
     rel = open(os.path.join(outputPath, "Seattle.rel"), "w")
     dyna = open(os.path.join(outputPath, "Seattle.dyna"), "w")
     usr = open(os.path.join(outputPath, "Seattle.usr"), "w")
-    route = open(os.path.join(outputPath, "Seattle.route"), "w")
+    dyna_route = open(os.path.join(outputPath, "Seattle_truth.dyna"), "w")
 
 
 def closeFile():
-    global network, trackInfo, truth, geo, rel, dyna, usr, route
+    global network, trackInfo, truth, geo, rel, dyna, usr, dyna_route
     network.close()
     trackInfo.close()
     truth.close()
@@ -134,14 +165,13 @@ def closeFile():
     rel.close()
     dyna.close()
     usr.close()
-    route.close()
+    dyna_route.close()
 
 
 def dataTransform():
     openFile()
-    nodeNum = processGeoAndRelAndRoute()
+    processGeoRelDyna()
     processUsr()
-    processDyna(nodeNum)
     processConfig()
     closeFile()
 
