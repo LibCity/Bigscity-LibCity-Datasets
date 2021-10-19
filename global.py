@@ -10,7 +10,7 @@ arcs = nodes = track = geo = dyna = rel = usr = route = dyna_route = None
 def process(name):
 
     # geo
-    geo.write("geo_id,type,coordinate\n")
+    geo.write("geo_id,type,coordinates\n")
     nodes_df = pd.read_csv(nodes, sep='\t', header=None)
     arcs_df = pd.read_csv(arcs, sep='\t', header=None)
     rel_dct = {}  # a dictionary, key: node_id, value: {"prev": [geo_id], "next": [geo_id]}
@@ -44,7 +44,7 @@ def process(name):
                 rel_id += 1
     # dyna
     dyna_df = pd.read_csv(track, sep='\t', header=None)
-    dyna.write("dyna_id,type,time,entity_id,coordinate\n")
+    dyna.write("dyna_id,type,time,entity_id,coordinates\n")
     for dyna_id, row in dyna_df.iterrows():
         lon, lat = float(row[0]), float(row[1])
         dyna.write(str(dyna_id) + ',trajectory,' + ',0,"' + str([lon, lat]) + '"\n')

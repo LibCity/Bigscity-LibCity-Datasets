@@ -10,9 +10,9 @@ network = trackInfo = truth = geo = rel = dyna = usr = dyna_route = None
 
 def processGeoRelDyna():
     # title
-    geo.write("geo_id,type,coordinate\n")
+    geo.write("geo_id,type,coordinates\n")
     rel.write("rel_id,type,origin_id,destination_id\n")
-    dyna.write("dyna_id,type,time,entity_id,coordinate\n")
+    dyna.write("dyna_id,type,time,entity_id,coordinates\n")
 
     # a dictionary, key: node_id, value: {"prev": [geo_id], "next": [geo_id]}
     rel_dct = {}
