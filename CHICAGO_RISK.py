@@ -9,16 +9,16 @@ import pickle
 import sys
 
 
-dataurl, outputdir, prefix = 'input/NYC_RISK', 'output/NYC_RISK', 'output/NYC_RISK/NYC_RISK'
+dataurl, outputdir, prefix = 'input/CHICAGO_RISK', 'output/CHICAGO_RISK', 'output/CHICAGO_RISK/CHICAGO_RISK'
 
 
 row_count, column_count = 20, 20
-graph_node_count = 243
+graph_node_count = 197
 
 
 geo_columns = ['geo_id', 'type', 'coordinates', 'row_id', 'column_id', 'risk_mask']
-rel_columns = ['rel_id', 'type', 'origin_id', 'destination_id', 'road_adj', 'risk_adj', 'poi_adj']
-dyna_columns = ['dyna_id', 'type', 'time', 'row_id', 'column_id', 'risk', 'holiday', *[f'poi_type_{i}' for i in range(7)],
+rel_columns = ['rel_id', 'type', 'origin_id', 'destination_id', 'road_adj', 'risk_adj']
+dyna_columns = ['dyna_id', 'type', 'time', 'row_id', 'column_id', 'risk', 'holiday',
             'temperature', *[f'weather_{n}' for n in ['clear', 'cloudy', 'rain', 'snow', 'mist']],
             'inflow', 'outflow']
 
@@ -65,7 +65,7 @@ def write_rel() -> None:
     rel_file.write('\n')
 
     adjs = {}
-    for k in ['road_adj', 'risk_adj', 'poi_adj']:
+    for k in ['road_adj', 'risk_adj']:
         with open(dataurl + '/' + k + '.pkl', 'rb') as f:
             adjs[k] = pickle.load(f)
 
@@ -79,8 +79,7 @@ def write_rel() -> None:
                 i,
                 j,
                 adjs['road_adj'][i][j],
-                adjs['risk_adj'][i][j],
-                adjs['poi_adj'][i][j]
+                adjs['risk_adj'][i][j]
             ]
             rel_file.write(','.join(map(str, row)))
             rel_file.write('\n')
@@ -106,7 +105,7 @@ def write_dyna() -> None:
     for r in range(num_rows):
         for c in range(num_cols):
             for ts in range(time_slots):
-                dt = datetime.datetime(2013, 1, 1, 0, 0) + datetime.timedelta(days=ts//24, hours=ts%24)
+                dt = datetime.datetime(2016, 2, 1, 0, 0) + datetime.timedelta(days=ts//24, hours=ts%24)
                 dt: str = dt.isoformat() + 'Z'
                 curr_row_raw = ad[ts, :, c, r]
 
@@ -118,11 +117,10 @@ def write_dyna() -> None:
                         c,
                         curr_row_raw[0],
                         curr_row_raw[32],
-                        *[curr_row_raw[33+i] for i in range(7)],
-                        curr_row_raw[40],
-                        *[curr_row_raw[41+i] for i in range(5)],
-                        curr_row_raw[46],
-                        curr_row_raw[47]
+                        curr_row_raw[33],
+                        *[curr_row_raw[34+i] for i in range(5)],
+                        curr_row_raw[39],
+                        curr_row_raw[40]
                 ]
 
                 for i in range(len(row)):
@@ -160,8 +158,7 @@ def write_config() -> None:
             'including_types': rel_type,
             rel_type: {
                 'road_adj': 'num',
-                'risk_adj': 'num',
-                'poi_adj': 'num'
+                'risk_adj': 'num'
             }
         },
         'grid': {
@@ -171,13 +168,6 @@ def write_config() -> None:
                 'column_id': 20,
                 'risk': 'num',
                 'holiday': 'num',
-                'poi_type_0': 'num',
-                'poi_type_1': 'num',
-                'poi_type_2': 'num',
-                'poi_type_3': 'num',
-                'poi_type_4': 'num',
-                'poi_type_5': 'num',
-                'poi_type_6': 'num',
                 'temperature': 'num',
                 'weather_clear': 'num',
                 'weather_cloudy': 'num',
@@ -191,7 +181,7 @@ def write_config() -> None:
         'info': {
             'data_col': dyna_columns[5:],
             'weight_col': rel_columns[4:],
-            'data_files': ['NYC_RISK'],
+            'data_files': ['CHICAGO_RISK'],
             'graph_input_col': [
                 'risk',
                 'inflow',
@@ -200,8 +190,8 @@ def write_config() -> None:
             'target_time_col': [
                 'holiday'
             ],
-            'geo_file': 'NYC_RISK',
-            'rel_file': 'NYC_RISK',
+            'geo_file': 'CHICAGO_RISK',
+            'rel_file': 'CHICAGO_RISK',
             'grid_len_row': row_count,
             'grid_len_column': column_count,
             'load_external': True,
