@@ -85,7 +85,7 @@ for feature in node_features:
     assert osmid not in nodes
     nodes[osmid] = properties
     coords_to_osm[(properties["x"], properties["y"])] = osmid
-    geo_writer.writerow([osmid, "trajectory", [properties["x"], properties["y"]],
+    geo_writer.writerow([osmid, "Point", [properties["x"], properties["y"]],
                          node_highway_to_int[properties["highway"]]])
 
 for feature in edge_features:

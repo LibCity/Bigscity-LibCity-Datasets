@@ -18,8 +18,8 @@ def dumpconfig(data_name):
     config['dyna'] = dict()
     config['dyna']['including_types'] = ['trajectory']
     config['dyna']['trajectory'] = {'entity_id': 'usr_id',
-                                    'location': 'geo_id',
-                                    'traj_id': 'coordinate'}
+                                    'location': 'coordinate',
+                                    'traj_id': 'num'}
     json.dump(config, open(os.path.join(data_name, 'config.json'),
                            'w', encoding='utf-8'), ensure_ascii=False)
 
@@ -54,9 +54,9 @@ def get_dyna(file, name, binary):
 
             # get entity_id, traj_id
             if driver_id not in ids:
-                cur_id += 1
-                ids[driver_id] = (cur_id, 0)
+                ids[driver_id] = (cur_id, -1)
                 usr_writer.writerow([cur_id])
+                cur_id += 1
             ids[driver_id] = (ids[driver_id][0], ids[driver_id][1] + 1)
             entity_id, traj_id = ids[driver_id]
 
@@ -66,10 +66,10 @@ def get_dyna(file, name, binary):
                 longitude, latitude, time = detail
                 cur_time = int_to_isoformat(int(time))
                 coords = [float(longitude), float(latitude)]
-                dyna_cnt += 1
                 dyna_col = [dyna_cnt, "trajectory", cur_time,
                             entity_id, traj_id, coords]
                 dyna_writer.writerow(dyna_col)
+                dyna_cnt += 1
         else:
             wrong_columns.append(line)
     dumpconfig(output_dir)
