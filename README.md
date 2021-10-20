@@ -55,9 +55,11 @@ Here we present the statistics of the  datasets we have processed.
 | xa_traj         | —         | —         | 55,916    | 688,796,584 | Xi'an, China                                              | Oct. 01, 2018 - Oct. 15, 2018    | —        |
 | bj_traj         | —         | —         | 7,595,372 | 144,026,946 | Beijing, China                                            | Jun. 01, 2015 - Jun. 30, 2015    | —        |
 | NYC_RISK        | 243       | 59049     | —         | 3504000     | New York, USA                                             | Jan. 01, 2013 - Dec. 31, 2013    | 60min    |
+| CHICAGO_RISK    | 197       | 38809     | —         | 2332800     | Chicago, USA                                              | Feb. 01, 2016 - Sep. 30, 2016    | 60min    |
 
 Note：
 
 - NYCTAXI_DYNA is a dataset that counts the inflow and outflow of the region with an irregular area division method.
 - NYCTAXI_OD is a dataset that counts the origin-destination flow between regions with an irregular area division method.
 - NYCTAXI_GRID is a dataset that counts the inflow and outflow of the region with a grid-base division method.
+
