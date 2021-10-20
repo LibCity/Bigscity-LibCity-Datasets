@@ -47,16 +47,16 @@ def get_dyna(f):
     x = pickle.load(f)
 
     for path in x:
-        entity_id += 1
         usr_writer.writerow([entity_id])
         for time, coords in path:
             cur_time = int_to_isoformat(time)
             coords = [coords[1], coords[0]]
 
-            dyna_cnt += 1
             dyna_col = [dyna_cnt, "trajectory", cur_time,
                         entity_id, coords]
             dyna_writer.writerow(dyna_col)
+            dyna_cnt += 1
+        entity_id += 1
 
 
 for day in range(1, 32):
