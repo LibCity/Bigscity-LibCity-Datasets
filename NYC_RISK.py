@@ -204,7 +204,6 @@ def write_config() -> None:
             'rel_file': 'NYC_RISK',
             'grid_len_row': row_count,
             'grid_len_column': column_count,
-            'load_external': True,
             'output_dim': 1,
             'time_intervals': 3600,
             'risk_thresholds': [0, 0.04, 0.08],
