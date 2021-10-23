@@ -32,4 +32,5 @@ def int_to_isoformat(_time):
     delta_time = datetime.timedelta(days=days, hours=hours, minutes=minutes, seconds=seconds)
     cur_time = datetime.datetime(1970, 1, 1) + delta_time
     cur_time = cur_time.isoformat()
+    cur_time += "Z"  # mysterious time format
     return cur_time
