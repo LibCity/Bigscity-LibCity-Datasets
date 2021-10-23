@@ -18,7 +18,7 @@ def dumpconfig(data_name):
     config['dyna'] = dict()
     config['dyna']['including_types'] = ['trajectory']
     config['dyna']['trajectory'] = {'entity_id': 'usr_id',
-                                    'location': 'coordinate',
+                                    'coordinates': 'coordinate',
                                     'traj_id': 'num'}
     json.dump(config, open(os.path.join(data_name, 'config.json'),
                            'w', encoding='utf-8'), ensure_ascii=False)
@@ -34,7 +34,7 @@ def get_dyna(file, name, binary):
     dyna_cnt = 0
     dyna_file = open(os.path.join(output_dir, name + ".dyna"), "w", newline='')
     dyna_writer = csv.writer(dyna_file)
-    dyna_writer.writerow(["dyna_id", "type", "time", "entity_id", "traj_id", "location"])
+    dyna_writer.writerow(["dyna_id", "type", "time", "entity_id", "traj_id", "coordinates"])
 
     ids = {}
     cur_id = 0
