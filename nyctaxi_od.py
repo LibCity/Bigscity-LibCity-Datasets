@@ -99,8 +99,7 @@ def gen_config_info(file_name, interval):
     info = \
         {
             "data_col": [
-                "inflow",
-                "outflow"
+                "flow"
             ],
             "data_files": [
                 file_name
