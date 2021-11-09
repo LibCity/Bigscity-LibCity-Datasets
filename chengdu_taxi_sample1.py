@@ -1,3 +1,4 @@
+# link: https://github.com/UrbComp/DeepTTE/tree/master/data
 import json
 import util
 import numpy as np
