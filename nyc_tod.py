@@ -1,3 +1,4 @@
+#link: https://github.com/liulingbo918/CSTN
 import csv
 import json
 import os.path
@@ -20,9 +21,9 @@ def gen_config_gridod(row_num, column_num):
 
 def gen_config_geo():
     geo = {"including_types": [
-        "Point"
+        "Polygon"
     ],
-        "Point": {
+        "Polygon": {
             "row_id": "num",
             "column_id": "num"
         }
