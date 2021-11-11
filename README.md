@@ -64,7 +64,7 @@ Note：
 - NYCTAXI_DYNA is a dataset that counts the inflow and outflow of the region with an irregular area division method.
 - NYCTAXI_OD is a dataset that counts the origin-destination flow between regions with an irregular area division method.
 - NYCTAXI_GRID is a dataset that counts the inflow and outflow of the region with a grid-base division method.
-- NYC_OD is a dataset that counts the flow of the region with a grid-base division method.
+- NYC_TOD is a dataset that counts the origin-destination flow between regions with a grid-base division method.
 
 ## Cite
 
