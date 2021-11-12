@@ -57,7 +57,7 @@ Here we present the statistics of the  datasets we have processed.
 | NYC_RISK             | 243       | 59049     | —         | 3504000     | New York, USA                                             | Jan. 01, 2013 - Dec. 31, 2013    | 60min    |
 | CHICAGO_RISK         | 197       | 38809     | —         | 2332800     | Chicago, USA                                              | Feb. 01, 2016 - Sep. 30, 2016    | 60min    |
 | Chengdu_Taxi_Sample1 | —         | —         | 4565      | 712360      | Chengdu, China                                            | Aug. 03, 2014 - Aug. 30, 2014    | —        |
-| NYC_TOD              | 15\*5        | —     | —         | 98,550,001  | New York, USA 
+| NYC_TOD              | 15*5        | —     | —         | 98,550,001  | New York, USA 
 
 Note：
 
