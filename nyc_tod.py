@@ -120,7 +120,7 @@ if __name__ == '__main__':
     writer.writerow(['geo_id', 'type', 'coordinates', 'row_id', 'column_id'])
     for r in range(row_num):
         for c in range(column_num):
-            writer.writerow([r * row_num + c, 'Point', '[]', r, c])
+            writer.writerow([r * row_num + c, 'Polygon', '[]', r, c])
     geo_file.close()
     print('Finish generating geo file.')
 
