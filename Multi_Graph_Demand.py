@@ -136,10 +136,10 @@ config['info']['data_files'] = ['Multi_Graph_Demand']
 config['info']['geo_file'] = 'Multi_Graph_Demand'
 config['info']['rel_file'] = 'Multi_Graph_Demand'
 
-config['info']['output_dim'] = 2 #???
-config['info']['time_intervals'] = 40*24*12
+config['info']['output_dim'] = 1
+config['info']['time_intervals'] = 300
 config['info']['init_weight_inf_or_zero'] = 'zero'
 config['info']['set_weight_link_or_dist'] = 'dist'
-config['info']['calculate_weight_adj'] = False
-config['info']['weight_adj_epsilon'] = 0.1 #??
-json.dump(config, open(outputdir + '/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
+config['info']['calculate_weight_adj'] = True
+config['info']['weight_adj_epsilon'] = 0.1
+json.dump(config, open(outputdir+'/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
