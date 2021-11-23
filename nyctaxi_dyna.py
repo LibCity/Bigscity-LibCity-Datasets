@@ -1,4 +1,5 @@
 # link: https://www1.nyc.gov/site/tlc/about/tlc-trip-record-data.page
+# The taxi_zones_final.json this script needed is at the root directory of this Github Repository, please move it to the input/ directory before you run this script.
 import json
 import math
 import os
