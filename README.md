@@ -51,9 +51,6 @@ Here we present the statistics of the  datasets we have processed.
 | Global               | 11045     | 18196     | 1         | 2502        | Neftekamsk, Republic of Bashkortostan, Russian Federation | —                                | 1s       |
 | bj_roadmap_edge      | 38027     | 95660     | —         | —           | Beijing, China                                            | —                                | —        |
 | bj_roadmap_node      | 16927     | 38027     | —         | —           | Beijing, China                                            | —                                | —        |
-| CD_TRAJ              | —         | —         | 99,084    | 591,977,313 | Chengdu, China                                            | Nov. 01, 2018 - Nov. 15, 2018    | —        |
-| XA_TRAJ              | —         | —         | 55,916    | 688,796,584 | Xi'an, China                                              | Oct. 01, 2018 - Oct. 15, 2018    | —        |
-| BJ_TRAJ              | —         | —         | 7,595,372 | 144,026,946 | Beijing, China                                            | Jun. 01, 2015 - Jun. 30, 2015    | —        |
 | NYC_RISK             | 243       | 59049     | —         | 3504000     | New York, USA                                             | Jan. 01, 2013 - Dec. 31, 2013    | 60min    |
 | CHICAGO_RISK         | 197       | 38809     | —         | 2332800     | Chicago, USA                                              | Feb. 01, 2016 - Sep. 30, 2016    | 60min    |
 | Chengdu_Taxi_Sample1 | —         | —         | 4565      | 712360      | Chengdu, China                                            | Aug. 03, 2014 - Aug. 30, 2014    | —        |
