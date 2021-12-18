@@ -52,7 +52,7 @@ for i in range(0, len(highway_list)):
     highway_to_int[highway_list[i]] = i + 1
 print(highway_to_int)
 
-rel_feature_names = ["highway", "length", "lanes", "tunnel", "bridge", "maxspeed", "width", "alley", "roundabout"]
+rel_feature_names = ["highway", "length", "lanes", "tunnel", "bridge", "maxspeed", "width", "alley", "roundabout", "weight"]
 
 # input
 nodes = json.load(open(os.path.join(os.path.join('input', DATA_NAME), 'nodes.json'), 'r', encoding='utf-8'))
@@ -108,6 +108,7 @@ for feature in edge_features:
     rel_output = [properties["fid"], "geo", int(properties["u"]), int(properties["v"])]
     for feature_name in rel_feature_names:
         rel_output.append(rel_properties[feature_name])
+    rel_output.append(1)
     rel_writer.writerow(rel_output)
 
     # check how many lon-la coords in nodes.json in LineString between points
@@ -150,6 +151,8 @@ config['rel']['including_types'] = ['geo']
 config['rel']['geo'] = {"highway": 'num', "length": 'num', "lanes": 'num',
                         "tunnel": 'num', "bridge": 'num', "maxspeed": 'num',
                         "width": 'num', "alley": 'num', "roundabout": 'num'}
+config['info'] = dict()
+config['info']['weight_col'] = 'weight'
 json.dump(config, open(os.path.join(output_dir, 'config.json'),
                        'w', encoding='utf-8'), ensure_ascii=False)
 
