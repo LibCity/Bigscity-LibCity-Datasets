@@ -100,7 +100,7 @@ config['dyna'] = dict()
 config['dyna']['including_types'] = ['trajectory']
 config['dyna']['trajectory'] = {'entity_id': 'usr_id', 'traj_id': 'num', 'coordinates': 'coordinate', 'current_dis': 'num', 'current_state': 'num'}
 config['info'] = dict()
-json.dump(config, open(output_dir + 'config.json', 'w', encoding='utf-8'), ensure_ascii=False)
+json.dump(config, open(output_dir + '/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
 
 print("lngs_mean: {}".format(np.mean(lngs_list)))
 print("lngs_std : {}".format(np.std(lngs_list)))
