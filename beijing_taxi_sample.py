@@ -6,12 +6,10 @@ import numpy as np
 import pandas as pd
 
 
-# output_dir = 'output/Beijing_Taxi_Sample'
-output_dir = 'data/Beijing_Taxi_Sample'
+output_dir = 'output/Beijing_Taxi_Sample'
 util.ensure_dir(output_dir)
 
-# data_url = 'input/Beijing_Taxi_Sample/'
-data_url = 'data/'
+data_url = 'input/Beijing_Taxi_Sample/'
 data_name = output_dir + '/Beijing_Taxi_Sample'
 
 dataset_list = ["2013-10-08", "2013-10-09"] + [f"2013-10-{i}" for i in range(10, 14)] + \
