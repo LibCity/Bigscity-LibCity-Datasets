@@ -438,9 +438,9 @@ if __name__ == '__main__':
     # 时间间隔
     interval = 3600
     # 开始年月
-    (start_year, start_month, start_day) = (2020, 7, 1)
+    (start_year, start_month, start_day) = (2019, 1, 1)
     # 结束年月
-    (end_year, end_month, end_day) = (2020, 9, 30)
+    (end_year, end_month, end_day) = (2022, 1, 31)
     # 行数
     row_num = 10
     # 列数
