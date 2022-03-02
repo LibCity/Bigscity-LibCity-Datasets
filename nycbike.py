@@ -36,6 +36,7 @@ def handle_point_geo(df):
     :param df:
     :return: df['geo_id', 'poi_name', 'poi_lat', 'poi_lon']
     """
+    print(df.columns)
     # 选出与start相关的列
     start = df[['start station id', 'start station name',
                 'start station latitude', 'start station longitude']]
