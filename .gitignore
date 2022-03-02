@@ -2,3 +2,4 @@
 /others/
 /.idea
 __pycache__
+*.csv

@@ -64,8 +64,10 @@ def handle_point_geo(df):
             lambda x: x != 0 and x is not None and not math.isnan(x))]
     # 确认只存在这些列
     station_data = station_data[['s_id', 'poi_name', 'poi_lat', 'poi_lon']]
+
+   
     # 排序
-    station_data = station_data.sort_values(by='s_id')
+    # station_data = station_data.sort_values(by='s_id')
     return station_data
 
 
