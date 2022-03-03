@@ -383,7 +383,7 @@ if __name__ == '__main__':
     start_time = time.time()
     # 参数
     # 时间间隔 s
-    interval = 3600
+    interval = 1800
     # 开始年月日
     (start_year, start_month, start_day) = (2020, 7, 1)
     # 结束年月日
@@ -418,6 +418,14 @@ if __name__ == '__main__':
         map(lambda x: pd.read_csv(x), data_url), axis=0
     )
     dataset_chi.reset_index(drop=True, inplace=True)
+    dataset_chi = dataset_chi.loc[dataset_chi['started_at'].
+        apply(lambda x:
+              '%d-%02d-%02d' % (end_year, end_month, end_day) >= x[:10] >=
+              '%d-%02d-%02d' % (start_year, start_month, start_day))]
+    dataset_chi = dataset_chi.loc[dataset_chi['ended_at'].
+        apply(lambda x:
+              '%d-%02d-%02d' % (end_year, end_month, end_day) >= x[:10] >=
+              '%d-%02d-%02d' % (start_year, start_month, start_day))]
     print('finish read csv')
 
     bike_chi_flow(
