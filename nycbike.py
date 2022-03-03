@@ -36,7 +36,6 @@ def handle_point_geo(df):
     :param df:
     :return: df['geo_id', 'poi_name', 'poi_lat', 'poi_lon']
     """
-    print(df.columns)
     # 选出与start相关的列
     start = df[['start station id', 'start station name',
                 'start station latitude', 'start station longitude']]
@@ -64,10 +63,8 @@ def handle_point_geo(df):
             lambda x: x != 0 and x is not None and not math.isnan(x))]
     # 确认只存在这些列
     station_data = station_data[['s_id', 'poi_name', 'poi_lat', 'poi_lon']]
-
-   
     # 排序
-    # station_data = station_data.sort_values(by='s_id')
+    station_data = station_data.sort_values(by='s_id')
     return station_data
 
 
@@ -441,9 +438,9 @@ if __name__ == '__main__':
     # 时间间隔
     interval = 3600
     # 开始年月
-    (start_year, start_month, start_day) = (2019, 1, 1)
+    (start_year, start_month, start_day) = (2020, 7, 1)
     # 结束年月
-    (end_year, end_month, end_day) = (2022, 1, 31)
+    (end_year, end_month, end_day) = (2020, 9, 30)
     # 行数
     row_num = 10
     # 列数
