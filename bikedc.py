@@ -124,9 +124,13 @@ def get_data_url(input_dir_flow, start_year, start_month, end_year, end_month):
 
 
 def gen_station_csv():
-    json_file_path = 'station_information/station_information.json'
-    csv_file_path = 'station_information/station_information.csv'
-
+    json_name = "station_information.json"
+    csv_name = "station_information.csv"
+    dir = "station_information"
+    os.mkdir("station_information") if not os.path.exists(dir) else None
+    json_file_path = os.path.join(dir, json_name)
+    csv_file_path = os.path.join(dir, csv_name)
+    
     # 获得station_data
     f = open(json_file_path, "r")
     json_data = json.load(f)['data']
@@ -184,9 +188,6 @@ def add_station_loc(data_set):
     # 确保已生成station_information.csv后，进行拼接操作
     station_information = \
         pd.read_csv('station_information/station_information.csv')
-    data_set = pd.merge(data_set, station_information,
-                        left_on='Start station',
-                        right_on='name')
     data_set = data_set.rename(columns={
         'Start date': 'starttime',
         'End date': 'stoptime',
@@ -199,13 +200,25 @@ def add_station_loc(data_set):
         'Bike number': 'bikeid',
     })
     data_set = pd.merge(data_set, station_information,
+                        left_on='start station name',
+                        right_on='name')
+    
+    
+    
+    data_set = pd.merge(data_set, station_information,
                         left_on='end station name',
                         right_on='name')
+    
     data_set = data_set.rename(columns={
-        'lat': 'end station latitude',
-        'lon': 'end station longitude',
+        'lat_x': 'start station latitude',
+        'lon_x': 'start station longitude',
+
     })
-    return data_set[['starttime',
+    data_set = data_set.rename(columns={
+        'lat_y': 'end station latitude',
+        'lon_y': 'end station longitude',
+    })
+    data_set = data_set[['starttime',
                      'stoptime',
                      'start station name',
                      'start station id',
@@ -217,6 +230,7 @@ def add_station_loc(data_set):
                      'end station longitude',
                      'bikeid',
                      ]]
+    return data_set.loc[:,~data_set.columns.duplicated()]
 
 
 def handle_point_geo(df):
@@ -252,7 +266,7 @@ def handle_point_geo(df):
     # 确认只存在这些列
     station_data = station_data[['s_id', 'poi_name', 'poi_lat', 'poi_lon']]
     # 排序
-    station_data = station_data.sort_values(by='s_id')
+    # station_data = station_data.sort_values(by='s_id')
     return station_data
 
 
@@ -589,15 +603,15 @@ if __name__ == '__main__':
     start_time = time.time()
     # 参数
     # 时间间隔 s
-    interval = 3600
+    interval = 3600 // 2
     # 开始年月日
-    (start_year, start_month, start_day) = (2020, 7, 1)
+    (start_year, start_month, start_day) = (2019, 1, 1)
     # 结束年月日
-    (end_year, end_month, end_day) = (2020, 9, 30)
+    (end_year, end_month, end_day) = (2022, 1, 31)
     # 行数
-    row_num = 16
+    row_num = 32
     # 列数
-    column_num = 8
+    column_num = 16
     # 输入文件夹名称
     input_dir_flow = 'input/BikeDC'
     # 输出文件名称 与 输出文件夹名称
