@@ -1,3 +1,4 @@
+#link: https://github.com/liulingbo918/CSTN
 import csv
 import json
 import os.path
@@ -20,9 +21,9 @@ def gen_config_gridod(row_num, column_num):
 
 def gen_config_geo():
     geo = {"including_types": [
-        "Point"
+        "Polygon"
     ],
-        "Point": {
+        "Polygon": {
             "row_id": "num",
             "column_id": "num"
         }
@@ -119,7 +120,7 @@ if __name__ == '__main__':
     writer.writerow(['geo_id', 'type', 'coordinates', 'row_id', 'column_id'])
     for r in range(row_num):
         for c in range(column_num):
-            writer.writerow([r * row_num + c, 'Point', '[]', r, c])
+            writer.writerow([r * row_num + c, 'Polygon', '[]', r, c])
     geo_file.close()
     print('Finish generating geo file.')
 
