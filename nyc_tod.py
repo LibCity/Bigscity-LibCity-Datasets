@@ -103,9 +103,9 @@ if __name__ == '__main__':
                         writer.writerow([idx,
                                          'state',
                                          '',
-                                         origin_column,
                                          origin_row,
-                                         destination_column,
+                                         origin_column,
+                                         destination_row,
                                          destination_column,
                                          line[origin_row * column_num + origin_column][destination_row][
                                              destination_column]
