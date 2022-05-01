@@ -136,6 +136,10 @@ config['dyna']['trajectory'] = {
     'holiday': 'num',
 }
 config['info'] = dict()
+config['info']['geo_file'] = 'Beijing_Taxi_Sample'
+config['info']['rel_file'] = 'Beijing_Taxi_Sample'
+config['info']['usr_file'] = 'Beijing_Taxi_Sample'
+config['info']['dyna_file'] = 'Beijing_Taxi_Sample'
 json.dump(config, open(output_dir + '/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
 
 print("dist_gap_mean: {}".format(np.mean(dist_gap_list)))
