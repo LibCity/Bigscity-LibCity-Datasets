@@ -100,8 +100,8 @@ if __name__ == '__main__':
         for origin_column in range(column_num):
             for destination_row in range(row_num):
                 for destination_column in range(column_num):
-                    idx += 1
                     for line in od_data:
+                        idx += 1
                         writer.writerow([idx,
                                          'state',
                                          '',
