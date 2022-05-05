@@ -95,17 +95,19 @@ if __name__ == '__main__':
          'origin_row_id', 'origin_column_id', 'destination_row_id', 'destination_column_id',
          'flow'])
 
-    for idx, line in enumerate(od_data):
-        for origin_row in range(row_num):
-            for origin_column in range(column_num):
-                for destination_row in range(row_num):
-                    for destination_column in range(column_num):
+    idx = 0
+    for origin_row in range(row_num):
+        for origin_column in range(column_num):
+            for destination_row in range(row_num):
+                for destination_column in range(column_num):
+                    for line in od_data:
+                        idx += 1
                         writer.writerow([idx,
                                          'state',
                                          '',
-                                         origin_column,
                                          origin_row,
-                                         destination_column,
+                                         origin_column,
+                                         destination_row,
                                          destination_column,
                                          line[origin_row * column_num + origin_column][destination_row][
                                              destination_column]
