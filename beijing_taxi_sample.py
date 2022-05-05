@@ -16,12 +16,11 @@ dataset_list = ["2013-10-08", "2013-10-09"] + [f"2013-10-{i}" for i in range(10,
                [f"2013-10-{i}" for i in range(15, 31)]
 
 geo = []
-# geo_file = np.load(data_url + 'embedding_128.npy')
-geo_file = np.load('Config/' + 'embedding_128.npy')
+geo_file = np.load(data_url + 'embedding_128.npy')
 for geo_id in range(geo_file.shape[0]):
     geo_embedding = ','.join(str(embedding) for embedding in geo_file[geo_id])
-    geo.append([geo_id, 'Polygon', '[' + geo_embedding + ']'])
-geo = pd.DataFrame(geo, columns=['geo_id', 'type', 'embeddings'])
+    geo.append([geo_id, 'Polygon', '[]', '[' + geo_embedding + ']'])
+geo = pd.DataFrame(geo, columns=['geo_id', 'type', 'coordinates', 'embeddings'])
 geo.to_csv(data_name+'.geo', index=False)
 
 usr = []
