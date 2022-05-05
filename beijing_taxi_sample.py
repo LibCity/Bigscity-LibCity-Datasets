@@ -117,7 +117,7 @@ usr.to_csv(data_name + '.usr', index=False)
 config = dict()
 config['geo'] = dict()
 config['geo']['including_types'] = ['Polygon']
-config['geo']['Polygon'] = {'embedding': 'other'}
+config['geo']['Polygon'] = {'coordinates': 'coordinate', 'embedding': 'other'}
 config['usr'] = dict()
 config['usr']['properties'] = {}
 config['dyna'] = dict()
@@ -136,7 +136,6 @@ config['dyna']['trajectory'] = {
 }
 config['info'] = dict()
 config['info']['geo_file'] = 'Beijing_Taxi_Sample'
-config['info']['rel_file'] = 'Beijing_Taxi_Sample'
 config['info']['usr_file'] = 'Beijing_Taxi_Sample'
 config['info']['dyna_file'] = 'Beijing_Taxi_Sample'
 json.dump(config, open(output_dir + '/config.json', 'w', encoding='utf-8'), ensure_ascii=False)
