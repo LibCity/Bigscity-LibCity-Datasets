@@ -60,6 +60,7 @@ for index, row in tqdm(dyna.iterrows()):
 dyna['time'] = new_time
 dyna['type'] = 'trajectory'
 dyna = dyna.rename(columns={'geo_id': 'location', 'usr_id': 'entity_id'})
+dyna['dyna_id'] = dyna.index
 dyna = dyna.reindex(columns=['dyna_id', 'type', 'time', 'entity_id', 'location'])
 dyna.to_csv(output_folder + '/foursquare_nyc.dyna', index=False)
 
