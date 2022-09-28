@@ -14,17 +14,17 @@ Besides, you can simply download the datasets we have processed, the data link i
 
 Here we present the statistics of the  datasets we have processed.
 
-- [Traffic State Datasets: Point-based Flow/Speed/Occupancy](#Traffic-State-Datasets:-Point-based-Flow/Speed/Occupancy)
-- [Traffic State Datasets: Grid-based In-Flow/Out-Flow](#Traffic-State-Datasets:-Grid-based-In-Flow/Out-Flow)
-- [Traffic State Datasets: OD-based Flow](#Traffic-State-Datasets:-OD-based-Flow)
-- [Traffic State Datasets: Grid-OD-based Flow](#Traffic-State-Datasets:-Grid-OD-based-Flow)
-- [Traffic State Datasets: Risk](#Traffic-State-Datasets:-Risk)
+- [Traffic State Datasets: Point-based Flow/Speed/Occupancy](#Traffic-State-Datasets-Point-based-Flow/Speed/Occupancy)
+- [Traffic State Datasets: Grid-based In-Flow/Out-Flow](#Traffic-State-Datasets-Grid-based-In-Flow/Out-Flow)
+- [Traffic State Datasets: OD-based Flow](#Traffic-State-Datasets-OD-based-Flow)
+- [Traffic State Datasets: Grid-OD-based Flow](#Traffic-State-Datasets-Grid-OD-based-Flow)
+- [Traffic State Datasets: Risk](#Traffic-State-Datasets-Risk)
 - [GPS Point Trajectory Datasets](#GPS-Point-Trajectory-Datasets)
 - [Road Segment-based Trajectory Datasets](#Road-Segment-based-Trajectory-Datasets)
 - [POI-based Trajectory Datasets](#POI-based-Trajectory-Datasets)
 - [Road Network Datasets](#Road-Network-Datasets)
 
-### Traffic State Datasets: Point-based Flow/Speed/Occupancy
+### Traffic State Datasets-Point-based Flow/Speed/Occupancy
 
 >Collected from sensors or Pre-processed from trajectory data.
 
@@ -49,7 +49,7 @@ Here we present the statistics of the  datasets we have processed.
 | HZMETRO                   | 80     | 6,400   | —    | 146,000     | Hangzhou, China             | Jan. 1, 2019 - Jan. 25, 2019     | 15min    |
 | NYCTAXI202001-202003_DYNA | 263    | 69,169  | —    | 574,392     | New York, USA               | Jan. 1, 2020 - Mar. 30, 2020     | 60min    |
 
-### Traffic State Datasets: Grid-based In-Flow/Out-Flow
+### Traffic State Datasets-Grid-based In-Flow/Out-Flow
 
 > Pre-processed from trajectory data.
 
@@ -71,20 +71,20 @@ Here we present the statistics of the  datasets we have processed.
 | NYCBike20160708 | 10*20 | — | — | 576,000 | New York, USA | Jul. 1, 2016 -   Aug. 29, 2016 | 30min |
 | NYCBike20160809 | 14*8 | — | — | 322,560 | New York, USA | Aug. 1, 2016 -   Sept. 29, 2016 | 30min |
 
-### Traffic State Datasets: OD-based Flow
+### Traffic State Datasets-OD-based Flow
 
 | DATASET                 | #GEO | #REL   | #USR | #DYNA       | PLACE         | DURATION                     | INTERVAL |
 | ----------------------- | ---- | ------ | ---- | ----------- | ------------- | ---------------------------- | -------- |
 | NYCTAXI202004-202006_OD | 263  | 69,169 | —    | 150,995,927 | New York, USA | Apr. 1, 2020 - Jun. 30, 2020 | 60min    |
 
 
-### Traffic State Datasets: Grid-OD-based Flow
+### Traffic State Datasets-Grid-OD-based Flow
 
 | DATASET              | #GEO      | #REL      | #USR      | #DYNA       | PLACE                                                     | DURATION                         | INTERVAL |
 | -------------------- | --------- | --------- | --------- | ----------- | --------------------------------------------------------- | -------------------------------- | -------- |
 | NYC_TOD              | 15\*5        | —     | —         | 98,550,000  | New York, USA | — |—|
 
-### Traffic State Datasets: Risk
+### Traffic State Datasets-Risk
 
 | DATASET              | #GEO      | #REL      | #USR      | #DYNA       | PLACE                                                     | DURATION                         | INTERVAL |
 | -------------------- | --------- | --------- | --------- | ----------- | --------------------------------------------------------- | -------------------------------- | -------- |
