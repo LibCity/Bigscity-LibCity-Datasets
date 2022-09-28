@@ -14,8 +14,8 @@ Besides, you can simply download the datasets we have processed, the data link i
 
 Here we present the statistics of the  datasets we have processed.
 
-- [Traffic State Datasets: Point-based Flow/Speed/Occupancy](#Traffic-State-Datasets-Point-based-Flow/Speed/Occupancy)
-- [Traffic State Datasets: Grid-based In-Flow/Out-Flow](#Traffic-State-Datasets-Grid-based-In-Flow/Out-Flow)
+- [Traffic State Datasets: Point-based Flow or Speed or Occupancy](#Traffic-State-Datasets-Point-based-Flow-or-Speed-or-Occupancy)
+- [Traffic State Datasets: Grid-based In-Flow and Out-Flow](#Traffic-State-Datasets-Grid-based-In-Flow-and-Out-Flow)
 - [Traffic State Datasets: OD-based Flow](#Traffic-State-Datasets-OD-based-Flow)
 - [Traffic State Datasets: Grid-OD-based Flow](#Traffic-State-Datasets-Grid-OD-based-Flow)
 - [Traffic State Datasets: Risk](#Traffic-State-Datasets-Risk)
@@ -24,7 +24,7 @@ Here we present the statistics of the  datasets we have processed.
 - [POI-based Trajectory Datasets](#POI-based-Trajectory-Datasets)
 - [Road Network Datasets](#Road-Network-Datasets)
 
-### Traffic State Datasets-Point-based Flow/Speed/Occupancy
+### Traffic State Datasets-Point-based Flow or Speed or Occupancy
 
 >Collected from sensors or Pre-processed from trajectory data.
 
@@ -49,7 +49,7 @@ Here we present the statistics of the  datasets we have processed.
 | HZMETRO                   | 80     | 6,400   | —    | 146,000     | Hangzhou, China             | Jan. 1, 2019 - Jan. 25, 2019     | 15min    |
 | NYCTAXI202001-202003_DYNA | 263    | 69,169  | —    | 574,392     | New York, USA               | Jan. 1, 2020 - Mar. 30, 2020     | 60min    |
 
-### Traffic State Datasets-Grid-based In-Flow/Out-Flow
+### Traffic State Datasets-Grid-based In-Flow and Out-Flow
 
 > Pre-processed from trajectory data.
 
