@@ -5,10 +5,10 @@ import numpy as np
 import pandas as pd
 
 
-output_dir = 'output/Chengdu-Taxi-Sample1'
+output_dir = 'output/Chengdu_Taxi_Sample1'
 util.ensure_dir(output_dir)
 
-data_url = 'input/Chengdu-Taxi-Sample1/'
+data_url = 'input/Chengdu_Taxi_Sample1/'
 data_name = output_dir + '/Chengdu_Taxi_Sample1'
 
 dataset_list = ["train_00", "train_01", "train_02", "train_03", "train_04", "test"]
@@ -100,8 +100,6 @@ config['dyna'] = dict()
 config['dyna']['including_types'] = ['trajectory']
 config['dyna']['trajectory'] = {'entity_id': 'usr_id', 'traj_id': 'num', 'coordinates': 'coordinate', 'current_dis': 'num', 'current_state': 'num'}
 config['info'] = dict()
-config['info']['geo_file'] = 'Chengdu-Taxi-Sample1'
-config['info']['rel_file'] = 'Chengdu-Taxi-Sample1'
 config['info']['usr_file'] = 'Chengdu-Taxi-Sample1'
 config['info']['dyna_file'] = 'Chengdu-Taxi-Sample1'
 json.dump(config, open(output_dir + '/config.json', 'w', encoding='utf-8'), ensure_ascii=False)

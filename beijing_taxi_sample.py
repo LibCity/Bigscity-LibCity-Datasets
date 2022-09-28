@@ -16,12 +16,11 @@ dataset_list = ["2013-10-08", "2013-10-09"] + [f"2013-10-{i}" for i in range(10,
                [f"2013-10-{i}" for i in range(15, 31)]
 
 geo = []
-# geo_file = np.load(data_url + 'embedding_128.npy')
-geo_file = np.load('Config/' + 'embedding_128.npy')
+geo_file = np.load(data_url + 'embedding_128.npy')
 for geo_id in range(geo_file.shape[0]):
     geo_embedding = ','.join(str(embedding) for embedding in geo_file[geo_id])
-    geo.append([geo_id, 'Polygon', '[' + geo_embedding + ']'])
-geo = pd.DataFrame(geo, columns=['geo_id', 'type', 'embeddings'])
+    geo.append([geo_id, 'Polygon', '[]', '[' + geo_embedding + ']'])
+geo = pd.DataFrame(geo, columns=['geo_id', 'type', 'coordinates', 'embeddings'])
 geo.to_csv(data_name+'.geo', index=False)
 
 usr = []
@@ -118,7 +117,7 @@ usr.to_csv(data_name + '.usr', index=False)
 config = dict()
 config['geo'] = dict()
 config['geo']['including_types'] = ['Polygon']
-config['geo']['Polygon'] = {'embedding': 'other'}
+config['geo']['Polygon'] = {'coordinates': 'coordinate', 'embedding': 'other'}
 config['usr'] = dict()
 config['usr']['properties'] = {}
 config['dyna'] = dict()
@@ -137,7 +136,6 @@ config['dyna']['trajectory'] = {
 }
 config['info'] = dict()
 config['info']['geo_file'] = 'Beijing_Taxi_Sample'
-config['info']['rel_file'] = 'Beijing_Taxi_Sample'
 config['info']['usr_file'] = 'Beijing_Taxi_Sample'
 config['info']['dyna_file'] = 'Beijing_Taxi_Sample'
 json.dump(config, open(output_dir + '/config.json', 'w', encoding='utf-8'), ensure_ascii=False)

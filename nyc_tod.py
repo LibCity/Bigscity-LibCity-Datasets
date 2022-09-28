@@ -95,13 +95,23 @@ if __name__ == '__main__':
          'origin_row_id', 'origin_column_id', 'destination_row_id', 'destination_column_id',
          'flow'])
 
+<<<<<<< HEAD
     cnt = 0
+=======
+    idx = 0
+>>>>>>> 1921e440a269abdeef7af7f73a5271ecda7419c2
     for origin_row in range(row_num):
         for origin_column in range(column_num):
             for destination_row in range(row_num):
                 for destination_column in range(column_num):
+<<<<<<< HEAD
                     for idx, line in enumerate(od_data):
                         writer.writerow([cnt,
+=======
+                    for line in od_data:
+                        idx += 1
+                        writer.writerow([idx,
+>>>>>>> 1921e440a269abdeef7af7f73a5271ecda7419c2
                                          'state',
                                          '',
                                          origin_row,
