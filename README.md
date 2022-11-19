@@ -38,7 +38,7 @@ Here we present the statistics of the  datasets we have processed.
 | Q_TRAFFIC                 | 45,148 | 63,422  | —    | 264,386,688 | Beijing, China              | Apr. 1, 2017 - May 31, 2017      | 15min    |
 | PEMSD3                    | 358    | 547     | —    | 9,382,464   | California, USA             | Sept. 1, 2018 -   Nov. 30, 2018  | 5min     |
 | PEMSD4                    | 307    | 340     | —    | 5,216,544   | San Francisco Bay Area, USA | Jan. 1, 2018 -   Feb. 28, 2018   | 5min     |
-| PEMSD7                    | 883    | 866     | —    | 24,921,792  | California, USA             | Jul. 1, 2016 -   Aug. 31, 2016   | 5min     |
+| PEMSD7                    | 883    | 866     | —    | 24,921,792  | California, USA             | May. 1, 2017 -   Aug. 31, 2017   | 5min     |
 | PEMSD8                    | 170    | 277     | —    | 3,035,520   | San Bernardino Area, USA    | Jul. 1, 2016 -   Aug. 31, 2016   | 5min     |
 | PEMSD7(M)                 | 228    | 51,984  | —    | 2,889,216   | California, USA             | weekdays of May   and June, 2012 | 5min     |
 | PEMS_BAY                  | 325    | 8,358   | —    | 16,937,700  | San Francisco Bay Area, USA | Jan. 1, 2017 -   Jun. 30, 2017   | 5min     |
