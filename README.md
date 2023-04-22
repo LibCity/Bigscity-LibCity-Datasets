@@ -63,7 +63,7 @@ Here we present the statistics of the  datasets we have processed.
 | PORTO201307-201309 | 20*10     | —         | —         | 441,600     | Porto, Portugal                                           | Jul. 1, 2013 -   Sept. 30, 2013  | 60min    |
 | AUSTINRIDE20160701-20160930 | 16*8      | —         | —         | 282,624     | Austin, USA                                               | Jul. 1, 2016 -   Sept. 30, 2016  | 60min    |
 | BIKEDC202007-202009 | 16*8      | —         | —         | 282,624     | Washington, USA                                           | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
-| BIKECHI202007-202009 | 15*18     | —         | —         | 670,680     | Chicago, USA                                              | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
+| BIKECHI202007-202009 | 15*18     | —         | —         | 596,160     | Chicago, USA                                              | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
 | NYCTaxi20140112 | 15*5 | — | — | 1,314,000 | New York, USA | Jan. 1, 2014 -   Dec. 31, 2014 | 30min |
 | NYCTaxi20150103 | 10*20 | — | — | 576,000 | New York, USA | Jan. 1, 2015 -   Mar. 1, 2015 | 30min |
 | NYCTaxi20160102 | 16*12 | — | — | 552,960 | New York, USA | Jan. 1, 2016 -   Feb. 29, 2016 | 30min |
