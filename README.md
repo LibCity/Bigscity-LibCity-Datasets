@@ -63,7 +63,8 @@ Here we present the statistics of the  datasets we have processed.
 | PORTO201307-201309 | 20*10     | —         | —         | 441,600     | Porto, Portugal                                           | Jul. 1, 2013 -   Sept. 30, 2013  | 60min    |
 | AUSTINRIDE20160701-20160930 | 16*8      | —         | —         | 282,624     | Austin, USA                                               | Jul. 1, 2016 -   Sept. 30, 2016  | 60min    |
 | BIKEDC202007-202009 | 16*8      | —         | —         | 282,624     | Washington, USA                                           | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
-| BIKECHI202007-202009 | 15*18     | —         | —         | 596,160     | Chicago, USA                                              | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
+| BIKECHI202007-202009-3600 | 15*18     | —         | —         | 596,160     | Chicago, USA                                              | Jul. 1, 2020 -   Sept. 30, 2020  | 60min    |
+| BIKECHI202007-202009 | 15*18 | — | — | 1,192,320 | Chicago, USA | Jul. 1, 2020 -   Sept. 30, 2020 | 30min |
 | NYCTaxi20140112 | 15*5 | — | — | 1,314,000 | New York, USA | Jan. 1, 2014 -   Dec. 31, 2014 | 30min |
 | NYCTaxi20150103 | 10*20 | — | — | 576,000 | New York, USA | Jan. 1, 2015 -   Mar. 1, 2015 | 30min |
 | NYCTaxi20160102 | 16*12 | — | — | 552,960 | New York, USA | Jan. 1, 2016 -   Feb. 29, 2016 | 30min |
@@ -161,3 +162,15 @@ Our paper is accepted by ACM SIGSPATIAL 2021. If you find LibCity useful for you
 Jingyuan Wang, Jiawei Jiang, Wenjun Jiang, Chao Li, and Wayne Xin Zhao. 2021. LibCity: An Open Library for Traffic Prediction. In Proceedings of the 29th International Conference on Advances in Geographic Information Systems (SIGSPATIAL '21). Association for Computing Machinery, New York, NY, USA, 145–148. DOI:https://doi.org/10.1145/3474717.3483923
 ```
 
+**04/27/2023 Update**: We published a [long paper](https://arxiv.org/abs/2304.14343) on LibCity, including (1) classification and base units of urban spatial-temporal data and proposed a unified storage format, i.e., atomic files, (2) a detailed review of urban spatial-temporal prediction field (including macro-group prediction, micro-individual prediction, and fundamental tasks), (3) proposed LibCity, an open source library for urban spatial-temporal prediction, detailing each module and use cases, and providing a web-based experiment management and visualization platform, (4) selected more than 20 models and datasets for comparison experiments based on LibCity, obtained model performance rankings and summarized promising future research directions. Please check this [link](https://arxiv.org/abs/2304.14343) for more details.
+
+For the long papar, please cite it as follows:
+
+```
+@article{libcitylong,
+  title={Towards Efficient and Comprehensive Urban Spatial-Temporal Prediction: A Unified Library and Performance Benchmark}, 
+  author={Jingyuan Wang and Jiawei Jiang and Wenjun Jiang and Chengkai Han and Wayne Xin Zhao},
+  journal={arXiv preprint arXiv:2304.14343},
+  year={2023}
+}
+```
