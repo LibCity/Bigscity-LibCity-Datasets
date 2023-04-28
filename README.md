@@ -164,7 +164,7 @@ Jingyuan Wang, Jiawei Jiang, Wenjun Jiang, Chao Li, and Wayne Xin Zhao. 2021. Li
 
 **04/27/2023 Update**: We published a [long paper](https://arxiv.org/abs/2304.14343) on LibCity, including (1) classification and base units of urban spatial-temporal data and proposed a unified storage format, i.e., atomic files, (2) a detailed review of urban spatial-temporal prediction field (including macro-group prediction, micro-individual prediction, and fundamental tasks), (3) proposed LibCity, an open source library for urban spatial-temporal prediction, detailing each module and use cases, and providing a web-based experiment management and visualization platform, (4) selected more than 20 models and datasets for comparison experiments based on LibCity, obtained model performance rankings and summarized promising future research directions. Please check this [link](https://arxiv.org/abs/2304.14343) for more details.
 
-For the long papar, please cite it as follows:
+For the long paper, please cite it as follows:
 
 ```
 @article{libcitylong,
