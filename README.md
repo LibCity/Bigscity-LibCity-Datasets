@@ -113,8 +113,8 @@ Here we present the statistics of the  datasets we have processed.
 
 | DATASET              | #GEO      | #REL      | #USR      | #DYNA       | PLACE                                                     | DURATION                         | INTERVAL |
 | -------------------- | --------- | --------- | --------- | ----------- | --------------------------------------------------------- | -------------------------------- | -------- |
-| Foursquare_TKY       | 61,857    | —         | 2,292     |   573,703   | Tokyo, Japan                                              | Apr. 4, 2012 -   Feb. 16, 2013   | —        |
-| Foursquare_NYC       | 38,332    | —         | 1,082     | 227,428     | New York, USA                                             | Apr. 3, 2012 -   Feb. 15, 2013   | —        |
+| Foursquare_TKY       | 61,858    | —         | 2,293     | 573,703     | Tokyo, Japan                                              | Apr. 4, 2012 -   Feb. 16, 2013   | —        |
+| Foursquare_NYC       | 38,333    | —         | 1,083     | 227,428     | New York, USA                                             | Apr. 3, 2012 -   Feb. 15, 2013   | —        |
 | Gowalla              | 1,280,969 | 913,660   | 107,092   | 6,442,892   | Global                                                    | Feb. 4, 2009 -   Oct. 23, 2010   | —        |
 | BrightKite           | 772,966   | 394,334   | 51,406    | 4,747,287   | Global                                                    | Mar. 21, 2008 -   Oct. 18, 2010  | —        |
 | Instagram            | 13,187    | —         | 78,233    | 2,205,794   | New York, USA                                             | Jun. 15, 2011 -   Nov. 8, 2016   | —        |
